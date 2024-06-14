@@ -8,9 +8,9 @@ const { user: UserModel } = require("../models");
  */
 
 const validateRegister = async(req, res, next) => {
-    const { nama, email, password } = req.body;
+    const { username, email, password } = req.body;
 
-    if (!nama || !email || !password) {
+    if (!username || !email || !password) {
         return res.send({
             message: "Bad request",
             data: null,
