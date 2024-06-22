@@ -1,4 +1,4 @@
-const { order: OrderModel, product: ProductModel } = require("../models");
+const { order: OrderModel, product: ProductModel, order_detail: OrderDetailModel } = require("../models");
 
 /**
  * @param {import("express").Request} req
@@ -6,30 +6,41 @@ const { order: OrderModel, product: ProductModel } = require("../models");
  * @param {import("express").NextFunction} _next
  */
 
-const index = async(req, res, _next) => {
-    try {
-        const orders = await OrderModel.findAll({
-            where: {
-                user_id: req.user.id,
-            },
-            attributes: ["id", "quantity", "total_price", "status"],
+const index = async(req, res, next) => {
+    const orders = await OrderModel.findAll({
+        where: {
+            user_id: req.user.id,
+        },
+        include: [{
+            model: OrderDetailModel,
+            as: "order_detail",
             include: [{
                 model: ProductModel,
-                as: 'product',
-                attributes: ["id", "title", "description", "price", "stock", "img_url"],
-            }]
-        });
+                attributes: ["title"],
+                as: "product",
+            }, ],
+        }, ],
+    });
 
-        return res.send({
-            message: "Success",
-            data: orders
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).send({ message: "Internal Server Error" });
-    }
+    return res.send({
+        message: "Success",
+        data: orders
+            .map((order) => ({
+                id: order.id,
+                order_date: order.order_date,
+                address: order.address,
+                total: parseFloat(order.total),
+                created_at: order.created_at,
+                items: order.order_detail.map((detail) => ({
+                    product_id: detail.product_id,
+                    title: detail.product.title,
+                    quantity: detail.quantity,
+                    price: parseFloat(detail.price),
+                    subtotal: parseFloat(detail.subtotal),
+                })),
+            })),
+    });
 };
-
 
 /**
  * @param {import("express").Request} req
@@ -37,52 +48,65 @@ const index = async(req, res, _next) => {
  * @param {import("express").NextFunction} _next
  */
 
-const create = async(req, res, _next) => {
-    try {
-        const { product_id, quantity } = req.body;
 
-        if (!product_id || !quantity) {
-            return res.status(400).send({ message: "permintaan tidak valid" });
-        }
+const create = async(req, res, next) => {
+    const { items } = req.body;
+    const currentUser = req.user;
 
-        const product = await ProductModel.findOne({
-            where: {
-                id: product_id,
-            },
-        });
+    const newOrder = await OrderModel.create({
+        user_id: currentUser.id,
+        order_date: new Date(),
+        address: currentUser.address,
+    });
 
-        if (!product) {
-            return res.status(404).send({ message: "Produk tidak ditemukan" });
-        }
+    const products = await ProductModel.findAll({
+        where: {
+            id: items.map((item) => item.product_id),
+        },
+    });
 
-        if (product.stock < quantity) {
-            return res.status(400).send({ message: "stock tidak mencukupi" });
-        }
+    let totalPrice = 0;
 
-        const order = await OrderModel.create({
-            user_id: req.user.id,
-            product_id,
-            quantity,
-            total_price: product.price * quantity,
-            status: "sedang diproses",
-        });
+    const orderDetails = items.map((item) => {
+        const product = products.find((b) => b.id === item.product_id);
 
-        await ProductModel.update({
-            stock: product.stock - quantity,
-        }, {
-            where: {
-                id: product_id,
-            },
-        });
+        const subtotal = product.price * item.quantity;
+        totalPrice += subtotal;
 
-        return res.send({
-            message: "Order created successfully",
-            data: order,
-        });
-    } catch (error) {
-        console.error("Error:", error);
-        return res.status(500).send({ message: "Internal Server Error" });
-    }
+        return {
+            order_id: newOrder.id,
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: product.price,
+            subtotal: subtotal,
+        };
+    });
+
+    await OrderDetailModel.bulkCreate(orderDetails);
+
+    await OrderModel.update({
+        total: totalPrice,
+        status: "Pending"
+    }, {
+        where: {
+            id: newOrder.id,
+        },
+    });
+
+    return res.send({
+        message: "Success",
+        data: {
+            order_id: newOrder.id,
+            total: totalPrice,
+            items: orderDetails.map((od) => ({
+                product_id: od.product_id,
+                quantity: od.quantity,
+                price: parseFloat(od.price),
+                subtotal: parseFloat(od.subtotal),
+            })),
+        },
+    });
 };
+
 
 module.exports = { index, create };

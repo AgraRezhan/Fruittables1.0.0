@@ -42,12 +42,34 @@ module.exports = {
             { id: 5, user_id: 3, product_id: 5, quantity: 10 },
         ]);
 
-        await queryInterface.bulkInsert("orders", [
-            { id: 1, user_id: 1, product_id: 1, quantity: 10, total_price: 100000, status: "sedang diproses" },
-            { id: 2, user_id: 1, product_id: 2, quantity: 10, total_price: 250000, status: "sedang diproses" },
-            { id: 3, user_id: 1, product_id: 3, quantity: 10, total_price: 50000, status: "sedang diproses" },
-            { id: 4, user_id: 3, product_id: 4, quantity: 10, total_price: 350000, status: "sedang diproses" },
-            { id: 5, user_id: 3, product_id: 5, quantity: 10, total_price: 350000, status: "sedang diproses" },
+        await queryInterface.bulkInsert("orders", [{
+                id: 1,
+                user_id: 1,
+                order_date: new Date(),
+                address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan",
+                total: 60000,
+            },
+            {
+                id: 2,
+                user_id: 1,
+                order_date: new Date(),
+                address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan",
+                total: 90000,
+            },
+            {
+                id: 3,
+                user_id: 3,
+                order_date: new Date(),
+                address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan",
+                total: 140000,
+            },
+        ]);
+        await queryInterface.bulkInsert("order_details", [
+            { order_id: 1, product_id: 1, quantity: 1, price: 10000, subtotal: 10000 },
+            { order_id: 1, product_id: 2, quantity: 2, price: 25000, subtotal: 50000 },
+            { order_id: 2, product_id: 3, quantity: 4, price: 5000, subtotal: 20000 },
+            { order_id: 2, product_id: 4, quantity: 2, price: 35000, subtotal: 70000 },
+            { order_id: 3, product_id: 5, quantity: 4, price: 35000, subtotal: 140000 },
         ]);
 
     },
