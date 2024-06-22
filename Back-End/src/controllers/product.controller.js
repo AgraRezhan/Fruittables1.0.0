@@ -79,6 +79,59 @@ const create = async(req, res, _next) => {
     }
 };
 
+const update = async(req, res, _next) => {
+    try {
+        const currentUser = req.user;
+        const { productId } = req.params;
+        const { title, description, price, stock, img_url } = req.body;
+
+        // Memastikan productId tidak undefined
+        if (!productId) {
+            return res.status(400).send({ message: "Product ID tidak ditemukan" });
+        }
+
+        // Memastikan hanya seller yang dapat memperbarui produk
+        if (currentUser.role !== 'seller') {
+            return res.status(403).send({ message: "Hanya seller yang dapat memperbarui produk" });
+        }
+
+        // Memastikan produk milik seller yang sedang login
+        const product = await ProductModel.findOne({
+            where: {
+                id: productId,
+                user_id: currentUser.id,
+            },
+        });
+
+        if (!product) {
+            return res.status(404).send({ message: "Produk tidak ditemukan atau Anda tidak memiliki izin untuk memperbaruinya" });
+        }
+
+        // Memvalidasi inputan dari user
+        if (!title && !description && !price && !stock && !img_url) {
+            return res.status(400).send({ message: "Tidak ada data yang diperbarui" });
+        }
+
+        // Update produk
+        const updatedProduct = await product.update({
+            title: title,
+            description: description,
+            price: price,
+            stock: stock,
+            img_url: img_url,
+        });
+
+        return res.send({
+            message: "Product updated successfully",
+            data: updatedProduct,
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
@@ -122,4 +175,4 @@ const remove = async(req, res, _next) => {
 };
 
 
-module.exports = { index, create, remove };
+module.exports = { index, create, remove, update };
