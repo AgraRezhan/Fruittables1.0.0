@@ -7,6 +7,8 @@ const express = require("express");
 const app = express();
 
 const authRouter = require("./routes/auth.router")
+const orderRouter = require("./routes/order.router")
+const cartRouter = require("./routes/cart.router")
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -19,6 +21,8 @@ if (!process.env.JWT_SECRET) {
 }
 
 app.use("/api/auth", authRouter)
+app.use("/api/orders", orderRouter)
+app.use("/api/carts", cartRouter)
 
 app.listen(process.env.SERVER_PORT || 3000, () => {
     console.log("Server Running");
