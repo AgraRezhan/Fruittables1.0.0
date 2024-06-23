@@ -36,6 +36,37 @@ const index = async(req, res, _next) => {
     }
 };
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} _next
+ */
+
+const show = async(req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const product = await ProductModel.findByPk(id, {
+            attributes: ["id", "title", "description", "price", "stock", "img_url"]
+        });
+
+        if (!product) {
+            return res.status(404).send({
+                message: "product tidak ditemukan",
+                data: null
+            })
+        }
+
+        return res.send({
+            message: "success",
+            data: product,
+        });
+
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+}
 
 /**
  * @param {import("express").Request} req
@@ -175,4 +206,4 @@ const remove = async(req, res, _next) => {
 };
 
 
-module.exports = { index, create, remove, update };
+module.exports = { index, show, create, remove, update };
