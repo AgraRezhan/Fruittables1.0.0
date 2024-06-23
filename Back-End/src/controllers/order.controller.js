@@ -67,6 +67,7 @@ const create = async(req, res, next) => {
 
     let totalPrice = 0;
 
+    //melakukan perhitungan terhadap subtotal order_detail
     const orderDetails = items.map((item) => {
         const product = products.find((b) => b.id === item.product_id);
 
@@ -84,15 +85,24 @@ const create = async(req, res, next) => {
 
     await OrderDetailModel.bulkCreate(orderDetails);
 
+    // Kurangi stok produk
+    items.forEach(async(item) => {
+        const product = products.find((b) => b.id === item.product_id);
+        product.stock -= item.quantity;
+        await product.save();
+    });
+
+    //melakukan update terhadap status dan total harga pada tabel order
     await OrderModel.update({
         total: totalPrice,
-        status: "Pending"
+        status: "pending"
     }, {
         where: {
             id: newOrder.id,
         },
     });
 
+    //mengembalikan hasil jika proses create order berhasil
     return res.send({
         message: "Success",
         data: {
@@ -108,5 +118,49 @@ const create = async(req, res, next) => {
     });
 };
 
+const cancelOrder = async(req, res, next) => {
+    const { orderId } = req.params;
 
-module.exports = { index, create };
+    try {
+        const order = await OrderModel.findByPk(orderId, {
+            include: {
+                model: OrderDetailModel,
+                as: 'order_detail'
+            }
+        });
+
+        //melakukan pengecekan dengan orderan berdasarkan orderId
+        if (!order) {
+            return res.status(404).send({ message: "Orderan tidak ditemukan" });
+        }
+
+        //melakukan pengecekan terhadap status orderan
+        if (order.status === "cancelled") {
+            return res.status(400).send({ message: "Orderan sudah dibatalkan" });
+        }
+
+        const orderDetails = order.order_detail;
+
+        //melakukan pengembalian jumlah produk yang telah dikurangi dari proses create order
+        orderDetails.forEach(async(detail) => {
+            const product = await ProductModel.findByPk(detail.product_id);
+            product.stock += detail.quantity;
+            await product.save();
+        });
+
+        await OrderModel.update({
+            status: "cancelled"
+        }, {
+            where: {
+                id: orderId,
+            },
+        });
+
+        return res.send({ message: "Order cancelled successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+module.exports = { index, create, cancelOrder };
