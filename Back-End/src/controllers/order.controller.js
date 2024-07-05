@@ -33,7 +33,7 @@ const index = async(req, res, next) => {
                 created_at: order.created_at,
                 items: order.order_detail.map((detail) => ({
                     product_id: detail.product_id,
-                    title: detail.product.title,
+                    title: detail.title,
                     quantity: detail.quantity,
                     price: parseFloat(detail.price),
                     subtotal: parseFloat(detail.subtotal),
@@ -70,6 +70,8 @@ const create = async(req, res, next) => {
     //melakukan perhitungan terhadap subtotal order_detail
     const orderDetails = items.map((item) => {
         const product = products.find((b) => b.id === item.product_id);
+
+        console.log("products", product)
 
         const subtotal = product.price * item.quantity;
         totalPrice += subtotal;

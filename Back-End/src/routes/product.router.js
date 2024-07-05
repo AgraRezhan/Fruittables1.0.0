@@ -11,14 +11,10 @@ const { index, show, create, remove, update } = require("../controllers/product.
 
 // /api/babs
 router.get("/", validateToken, index);
-<<<<<<< HEAD
-router.post("/", validateToken, upload.single("img_url"), create);
-=======
 router.get("/:id", validateToken, show);
-router.post("/", validateToken, create);
->>>>>>> 0cd85ec3db4f7663dd2ed8876620ad270d9aef40
+router.post("/", validateToken, upload.single("img_url"), create);
 router.delete("/:productId", validateToken, remove);
-router.put("/:productId", validateToken, upload.single("image"), update);
+router.put("/:productId", validateToken, upload.single("img_url"), update);
 
 
 module.exports = router;

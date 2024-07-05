@@ -12,10 +12,10 @@ const index = async(req, res, _next) => {
         let products;
 
 
-        if (currentUser.role === 'customer') {
+        if (currentUser.role == "customer") {
             // Jika user adalah customer, tampilkan semua produk
             products = await ProductModel.findAll();
-        } else if (currentUser.role === 'seller') {
+        } else if (currentUser.role == 'seller') {
             // Jika user adalah seller, tampilkan produk berdasarkan user_id
             products = await ProductModel.findAll({
                 where: {
@@ -126,7 +126,7 @@ const update = async(req, res, _next) => {
     try {
         const currentUser = req.user;
         const { productId } = req.params;
-        const image = req.file.path;
+        // const image = req.file.path;
         const { title, description, price, stock, img_url } = req.body;
 
 
@@ -163,7 +163,7 @@ const update = async(req, res, _next) => {
             description: description,
             price: price,
             stock: stock,
-            img_url: image,
+            img_url,
         });
 
         return res.send({
