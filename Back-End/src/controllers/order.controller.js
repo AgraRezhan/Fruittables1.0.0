@@ -53,25 +53,39 @@ const create = async(req, res, next) => {
     const { items } = req.body;
     const currentUser = req.user;
 
+    // Ambil semua product_id dari orderan
+    const idOrder = items.map((item) => item.product_id);
+
+    // Cek jika tidak ada idOrder yang diberikan
+    if (idOrder.length === 0) {
+        return res.status(400).send({ message: "Data tidak ditemukan" });
+    }
+
+    // Cari produk berdasarkan product_id dari orderan
+    const products = await ProductModel.findAll({
+        where: {
+            id: idOrder,
+        },
+    });
+
+    // Jika jumlah produk yang ditemukan tidak sama dengan jumlah orderan, berarti ada product_id yang tidak valid
+    if (products.length !== idOrder.length) {
+        return res.status(400).send({ message: "Satu atau lebih produk tidak ditemukan" });
+    }
+
     const newOrder = await OrderModel.create({
         user_id: currentUser.id,
         order_date: new Date(),
         address: currentUser.address,
     });
 
-    const products = await ProductModel.findAll({
-        where: {
-            id: items.map((item) => item.product_id),
-        },
-    });
-
     let totalPrice = 0;
 
-    //melakukan perhitungan terhadap subtotal order_detail
+    // Melakukan perhitungan terhadap subtotal order_detail
     const orderDetails = items.map((item) => {
         const product = products.find((b) => b.id === item.product_id);
 
-        console.log("products", product)
+        console.log("products", product);
 
         const subtotal = product.price * item.quantity;
         totalPrice += subtotal;
@@ -88,23 +102,23 @@ const create = async(req, res, next) => {
     await OrderDetailModel.bulkCreate(orderDetails);
 
     // Kurangi stok produk
-    items.forEach(async(item) => {
+    for (const item of items) {
         const product = products.find((b) => b.id === item.product_id);
         product.stock -= item.quantity;
         await product.save();
-    });
+    }
 
-    //melakukan update terhadap status dan total harga pada tabel order
+    // Melakukan update terhadap status dan total harga pada tabel order
     await OrderModel.update({
         total: totalPrice,
-        status: "pending"
+        status: "pending",
     }, {
         where: {
             id: newOrder.id,
         },
     });
 
-    //mengembalikan hasil jika proses create order berhasil
+    // Mengembalikan hasil jika proses create order berhasil
     return res.send({
         message: "Success",
         data: {
@@ -119,6 +133,7 @@ const create = async(req, res, next) => {
         },
     });
 };
+
 
 const cancelOrder = async(req, res, next) => {
     const { orderId } = req.params;
