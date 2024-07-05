@@ -41,6 +41,7 @@ const create = async(req, res, _next) => {
     try {
         const { product_id, quantity } = req.body;
 
+        //melakukan pengecekan terhadapinputan user
         if (!product_id || !quantity) {
             return res.status(400).send({ message: "permintaan tidak valid" });
         }
@@ -51,10 +52,12 @@ const create = async(req, res, _next) => {
             },
         });
 
+        //melakukan pengecekan produk dari product_id
         if (!product) {
             return res.status(404).send({ message: "Produk tidak ditemukan" });
         }
 
+        //melakukan pengecekan pada stok produk
         if (product.stock < quantity) {
             return res.status(400).send({ message: "stock tidak mencukupi" });
         }
@@ -100,10 +103,13 @@ const remove = async(req, res, _next) => {
             },
         });
 
+        //melakukan pengecekan terhadap produk yang akan di hapus dari 
+        //cart berdasarkan id danuser_id dari tabel cart
         if (!cartItem) {
             return res.status(404).send({ message: "Cart item not found" });
         }
 
+        //melakukan penghapusan data cart
         await CartModel.destroy({
             where: {
                 id,

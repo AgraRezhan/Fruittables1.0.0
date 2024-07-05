@@ -5,6 +5,7 @@ const {
     product,
     cart,
     order,
+    order_detail
 } = require("../../models");
 
 /** @type {import('sequelize-cli').Migration} */
@@ -18,6 +19,7 @@ module.exports = {
         await product.destroy({ truncate: true });
         await cart.destroy({ truncate: true });
         await order.destroy({ truncate: true });
+        await order_detail.destroy({ truncate: true });
 
         await queryInterface.bulkInsert("users", [
             { id: 1, username: "JohnDoe", first_name: "John", last_name: "Doe", email: "johndoe@gmail.com", password: "$2a$12$.HOb8SlLxGN4usHDihNaQe6IFDodXO09pO6Nfi.M96XzcTJ9F1HDu", address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan", role: "customer" },
