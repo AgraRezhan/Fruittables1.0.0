@@ -43,31 +43,42 @@ const index = async(req, res, _next) => {
  * @param {import("express").NextFunction} _next
  */
 
+
 const create = async(req, res, _next) => {
     try {
         const currentUser = req.user;
 
-        //melakukan validasi terhadap user berdasarkan role
+        if (!req.file) {
+            return res.status(400).send({ message: "Gambar tidak ditemukan, pastikan gambar diunggah dengan benar" });
+        }
+
+        const image = req.file.path; // Cloudinary URL
+        console.log("Image ini:", image);
+        console.log("ini body", req.body)
+
+        // Melakukan validasi terhadap user berdasarkan role
         if (currentUser.role !== 'seller') {
-            return res.status(403).send({ message: "hanya seller yang dapat menambahkan produk" });
+            return res.status(403).send({ message: "Hanya seller yang dapat menambahkan produk" });
         }
 
-        const { title, description, price, stock, img_url } = req.body;
+        const { title, description, price, stock } = req.body;
 
-        //memvalidasi inputan dari user
-        if (!title || !description || !price || !stock || !img_url) {
-            return res.status(400).send({ message: "permintaaan tidak valid" });
+        // Memvalidasi inputan dari user
+        if (!title || !description || !price || !stock) {
+            return res.status(400).send({ message: "Permintaan tidak valid, pastikan semua data diisi" });
         }
 
-        //create produbaru
+        // Membuat produbaru
         const newProduct = await ProductModel.create({
             user_id: currentUser.id,
             title,
             description,
             price,
             stock,
-            img_url,
+            img_url: image,
         });
+
+        console.log("New product:", newProduct);
 
         return res.send({
             message: "Product created successfully",
@@ -79,11 +90,14 @@ const create = async(req, res, _next) => {
     }
 };
 
+
 const update = async(req, res, _next) => {
     try {
         const currentUser = req.user;
         const { productId } = req.params;
+        const image = req.file.path;
         const { title, description, price, stock, img_url } = req.body;
+
 
         // Memastikan productId tidak undefined
         if (!productId) {
@@ -118,7 +132,7 @@ const update = async(req, res, _next) => {
             description: description,
             price: price,
             stock: stock,
-            img_url: img_url,
+            img_url: image,
         });
 
         return res.send({

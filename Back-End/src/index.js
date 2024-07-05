@@ -1,6 +1,7 @@
 const path = require("path");
 
-require("dotenv").config({ path: path.join(__dirname, "../.env") });
+// require("dotenv").config({ path: path.join(__dirname, "../.env") });
+require('dotenv').config()
 
 const express = require("express");
 
@@ -13,6 +14,7 @@ const productRouter = require("./routes/product.router")
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+const cors = require("cors");
 
 if (!process.env.JWT_SECRET) {
     console.error(
@@ -20,6 +22,8 @@ if (!process.env.JWT_SECRET) {
     );
     process.exit(1);
 }
+
+app.use(cors());
 
 app.use("/api/auth", authRouter)
 app.use("/api/orders", orderRouter)
