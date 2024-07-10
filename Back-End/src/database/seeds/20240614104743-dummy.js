@@ -24,8 +24,6 @@ module.exports = {
         await queryInterface.bulkInsert("users", [
             { id: 1, username: "JohnDoe", first_name: "John", last_name: "Doe", email: "johndoe@gmail.com", password: "$2a$12$.HOb8SlLxGN4usHDihNaQe6IFDodXO09pO6Nfi.M96XzcTJ9F1HDu", address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan", role: "customer" },
             { id: 2, username: "ErdianFernando", first_name: "Erdian", last_name: "Fernando", email: "erdianfernando@gmail.com", password: "$2a$12$.HOb8SlLxGN4usHDihNaQe6IFDodXO09pO6Nfi.M96XzcTJ9F1HDu", address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan", role: "seller" },
-            { id: 3, username: "test1", first_name: "test", last_name: "test1", email: "test1@example.com", password: "$2a$12$.HOb8SlLxGN4usHDihNaQe6IFDodXO09pO6Nfi.M96XzcTJ9F1HDu", address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan", role: "customer" },
-            { id: 4, username: "test2", first_name: "test", last_name: "test2", email: "test2@example.com", password: "$2a$12$.HOb8SlLxGN4usHDihNaQe6IFDodXO09pO6Nfi.M96XzcTJ9F1HDu", address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan", role: "seller" },
         ]);
 
         await queryInterface.bulkInsert("products", [

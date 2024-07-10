@@ -84,15 +84,15 @@ const create = async(req, res, _next) => {
         }
 
         const image = req.file.path; // Cloudinary URL
-        console.log("Image ini:", image);
-        console.log("ini body", req.body)
+        // console.log("Image ini:", image);
+        // console.log("ini body", req.body)
 
         // Melakukan validasi terhadap user berdasarkan role
         if (currentUser.role !== 'seller') {
             return res.status(403).send({ message: "Hanya seller yang dapat menambahkan produk" });
         }
 
-        const { title, description, price, stock } = req.body;
+        const { title, description, price, stock, img_url } = req.body;
 
         // Memvalidasi inputan dari user
         if (!title || !description || !price || !stock) {
@@ -107,6 +107,7 @@ const create = async(req, res, _next) => {
             price,
             stock,
             img_url: image,
+            // img_url: image,
         });
 
         console.log("New product:", newProduct);
@@ -126,7 +127,7 @@ const update = async(req, res, _next) => {
     try {
         const currentUser = req.user;
         const { productId } = req.params;
-        // const image = req.file.path;
+        const image = req.file.path;
         const { title, description, price, stock, img_url } = req.body;
 
 
@@ -163,7 +164,7 @@ const update = async(req, res, _next) => {
             description: description,
             price: price,
             stock: stock,
-            img_url,
+            img_url: image,
         });
 
         return res.send({
