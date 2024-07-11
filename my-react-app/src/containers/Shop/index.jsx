@@ -25,6 +25,7 @@ const Index = () => {
                   <th scope="col">Price</th>
                   <th scope="col">Order date</th>
                   <th scope="col">Quantity</th>
+                  <th scope="col">Status</th>
                   <th scope="col">Handle</th>
                 </tr>
               </thead>
@@ -65,6 +66,11 @@ const Index = () => {
                       <td>
                         <p className="mb-0 mt-4">
                             {order.quantity}
+                        </p>
+                      </td>
+                      <td>
+                        <p className="mb-0 mt-4">
+                            {order.status}
                         </p>
                       </td>
                       <td>
