@@ -81,12 +81,12 @@ const index = () => {
                     className="input-group quantity mb-5"
                     style={{ width: 100 }}
                   >
-                    <div className="input-group-btn">
+                    {/* <div className="input-group-btn">
                       <button className="btn btn-sm btn-minus rounded-circle bg-light border">
                         <i className="fa fa-minus"></i>
                       </button>
-                    </div>
-                    <input
+                    </div> */}
+                    {/* <input
                       type="text"
                       className="form-control form-control-sm text-center border-0"
                       value="1"
@@ -95,7 +95,7 @@ const index = () => {
                       <button className="btn btn-sm btn-plus rounded-circle bg-light border">
                         <i className="fa fa-plus"></i>
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                   <button
                     onClick={()=> handleAddToCart(products)}

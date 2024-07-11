@@ -2,10 +2,13 @@ import React, { useEffect } from 'react';
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import useProductStore from '../../store/useProductStore';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 const Cart = () => {
-  const { cartItems, fetchCarts, removeCartItem, incrementCartItemQuantity, decrementCartItemQuantity } = useProductStore();
- 
+  const { cartItems, fetchCarts, removeCartItem, incrementCartItemQuantity, decrementCartItemQuantity, createOrder } = useProductStore();
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
   const flatRate = 3000; // Flat rate untuk shipping
 
   useEffect(() => {
@@ -32,6 +35,15 @@ const Cart = () => {
 
   const handleDecrease = (itemId) => {
     decrementCartItemQuantity(itemId);
+  };
+
+  const handleCheckout = () => {
+    const orderData = {
+      items: cartItems,
+      // Add other necessary order data like total price, user info, shipping address, etc.
+    };
+
+    createOrder(orderData, navigate, setError);
   };
 
   return (
@@ -175,6 +187,7 @@ const Cart = () => {
                     </p>
                 </div>
                 <button
+                onClick={handleCheckout}
                   className="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
                   type="button"
                 >

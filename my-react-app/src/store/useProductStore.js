@@ -6,6 +6,7 @@ const useProductStore = create((set, get) => ({
     token: localStorage.getItem('token') || null,
     productItems: [],
     cartItems: [],
+    orders: [],
 
     register: async(userData, navigate, setError) => {
         try {
@@ -233,7 +234,41 @@ const useProductStore = create((set, get) => ({
         } catch (error) {
             console.error('Update cart item quantity error:', error);
         }
+    },
+
+    createOrder: async(orderData, navigate, setError) => {
+        const token = get().token;
+        if (!token) {
+            console.error('Token not found. Unable to create order.');
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:8000/api/orders', orderData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const newOrder = response.data;
+
+            // Update orders in the state
+            set(state => ({
+                orders: [...state.orders, newOrder],
+                cartItems: [] // Clear the cart after successful order creation
+            }));
+
+            // Redirect to order success page
+            navigate('/shop');
+        } catch (error) {
+            console.error('Create order error:', error);
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            } else {
+                setError('Order creation failed. Please try again.');
+            }
+        }
     }
+
 }));
 
 export default useProductStore;
