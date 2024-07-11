@@ -1,16 +1,30 @@
 import React, { useEffect } from 'react';
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import useProductStore from '../../store/useProductStore';
+import useCartStore from '../../store/useCartStore';
 
 const index = () => {
-  const { cartItems, fetchCarts } = useProductStore();
+  const { cartItems, fetchCarts, removeCartItem } = useCartStore();
+  const flatRate = 3000; // Flat rate untuk shipping
 
   useEffect(() => {
     fetchCarts();
   }, [fetchCarts]);
 
-  console.log("ini carts", cartItems)
+  // Hitung subtotal
+  const subtotal = cartItems.reduce((sum, item) => {
+    return sum + (item.product.price * item.quantity);
+  }, 0);
+
+  // Hitung total dengan mengurangi flat rate dari subtotal
+  const total = subtotal + flatRate;
+
+  console.log("ini carts", cartItems);
+
+  const onRemoveItem = (productId) => {
+      removeCartItem(productId);
+    
+  };
 
   return (
     <>
@@ -46,7 +60,12 @@ const index = () => {
                       <p className="mb-0 mt-4">{item.product.title}</p>
                     </td>
                     <td>
-                      <p className="mb-0 mt-4">{item.product.price} $</p>
+                      <p className="mb-0 mt-4">
+                      {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(item.product.price)}
+                        </p>
                     </td>
                     <td>
                       <div
@@ -72,10 +91,17 @@ const index = () => {
                       </div>
                     </td>
                     <td>
-                      <p className="mb-0 mt-4">{item.product.price * item.quantity} $</p>
+                      <p className="mb-0 mt-4">
+                      {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(item.product.price * item.quantity)}
+                        </p>
                     </td>
                     <td>
-                      <button className="btn btn-md rounded-circle bg-light border mt-4">
+                      <button 
+                      onClick={() => onRemoveItem(item.product.id)}
+                      className="btn btn-md rounded-circle bg-light border mt-4">
                         <i className="fa fa-times text-danger"></i>
                       </button>
                     </td>
@@ -107,19 +133,34 @@ const index = () => {
                   </h1>
                   <div className="d-flex justify-content-between mb-4">
                     <h5 className="mb-0 me-4">Subtotal:</h5>
-                    <p className="mb-0">$96.00</p>
+                    <p className="mb-0">
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(subtotal.toFixed(2))}
+                      </p>
                   </div>
                   <div className="d-flex justify-content-between">
                     <h5 className="mb-0 me-4">Shipping</h5>
                     <div className="">
-                      <p className="mb-0">Flat rate: $3.00</p>
+                      <p className="mb-0">Flat rate: 
+                      {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(flatRate.toFixed(2))}
+                        </p>
                     </div>
                   </div>
                   <p className="mb-0 text-end">Shipping to Ukraine.</p>
                 </div>
                 <div className="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                   <h5 className="mb-0 ps-4 me-4">Total</h5>
-                  <p className="mb-0 pe-4">$99.00</p>
+                  <p className="mb-0 pe-4">
+                  {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    }).format(total.toFixed(2))}
+                    </p>
                 </div>
                 <button
                   className="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
