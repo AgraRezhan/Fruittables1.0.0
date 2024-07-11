@@ -267,7 +267,26 @@ const useProductStore = create((set, get) => ({
                 setError('Order creation failed. Please try again.');
             }
         }
-    }
+    },
+    fetchOrder: async() => {
+        try {
+            const token = get().token;
+            if (!token) {
+                console.error('Token not found. Unable to fetch products.');
+                return;
+            }
+
+            const response = await axios.get('http://localhost:8000/api/orders', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            set({ orders: response.data.data });
+            console.log("Fetched carts successfully:", response.data.data);
+        } catch (error) {
+            console.error('Fetch carts error:', error);
+        }
+    },
 
 }));
 
