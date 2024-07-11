@@ -1,11 +1,53 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import useProductStore from "../../store/useProductStore";
 
 const index = () => {
+  const { id } = useParams();
+  const token = localStorage.getItem("token");
+  const [products, setProducts] = useState(""); // Mulai dengan null untuk menunjukkan bahwa data belum diambil
+  const {addCartItem} = useProductStore();
+
+  console.log("ini id", id);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/api/products/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setProducts(response.data.data);
+      console.log("ini data", response.data.data);
+    } catch (err) {
+      console.log("Data tidak ditemukan", err);
+      setProducts([]); // Set ke array kosong jika terjadi kesalahan
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleAddToCart = (product) => {
+    if (product && product.id) {
+      addCartItem(product);
+      alert("berhasil ditambahkan")
+    } else {
+      console.error("Invalid product:", product);
+    }
+  };
+
+  console.log("ini products", products);
   return (
     <>
-    <Navbar />
+      <Navbar />
       <div className="container-fluid py-5 mt-5">
         <div className="container py-5">
           <div className="row g-4 mb-5">
@@ -15,17 +57,18 @@ const index = () => {
                   <div className="border rounded">
                     <a href="#">
                       <img
-                        src="img/single-item.jpg"
+                        src={products.img_url}
                         className="img-fluid rounded"
                         alt="Image"
                       />
                     </a>
                   </div>
                 </div>
+
                 <div className="col-lg-6">
-                  <h4 className="fw-bold mb-3">Brocoli</h4>
-                  <p className="mb-3">Category: Vegetables</p>
-                  <h5 className="fw-bold mb-3">3,35 $</h5>
+                  <h4 className="fw-bold mb-3">{products.title}</h4>
+                  <p className="mb-3">Category: Fruit</p>
+                  <h5 className="fw-bold mb-3">{products.price}</h5>
                   <div className="d-flex mb-4">
                     <i className="fa fa-star text-secondary"></i>
                     <i className="fa fa-star text-secondary"></i>
@@ -33,15 +76,7 @@ const index = () => {
                     <i className="fa fa-star text-secondary"></i>
                     <i className="fa fa-star"></i>
                   </div>
-                  <p className="mb-4">
-                    The generated Lorem Ipsum is therefore always free from
-                    repetition injected humour, or non-characteristic words etc.
-                  </p>
-                  <p className="mb-4">
-                    Susp endisse ultricies nisi vel quam suscipit. Sabertooth
-                    peacock flounder; chain pickerel hatchetfish, pencilfish
-                    snailfish
-                  </p>
+                  <p className="mb-4">{products.description}</p>
                   <div
                     className="input-group quantity mb-5"
                     style={{ width: 100 }}
@@ -62,14 +97,15 @@ const index = () => {
                       </button>
                     </div>
                   </div>
-                  <a
-                    href="#"
+                  <button
+                    onClick={()=> handleAddToCart(products)}
                     className="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </button>
                 </div>
+
                 <div className="col-lg-12">
                   <nav>
                     <div className="nav nav-tabs mb-3">
@@ -107,15 +143,7 @@ const index = () => {
                       aria-labelledby="nav-about-tab"
                     >
                       <p>
-                        The generated Lorem Ipsum is therefore always free from
-                        repetition injected humour, or non-characteristic words
-                        etc. Susp endisse ultricies nisi vel quam suscipit{" "}
-                      </p>
-                      <p>
-                        Sabertooth peacock flounder; chain pickerel hatchetfish,
-                        pencilfish snailfish filefish Antarctic icefish goldeye
-                        aholehole trumpetfish pilot fish airbreathing catfish,
-                        electric ray sweeper.
+                       {products.description}
                       </p>
                       <div className="px-2">
                         <div className="row g-4">
@@ -203,7 +231,7 @@ const index = () => {
                         <img
                           src="img/avatar.jpg"
                           className="img-fluid rounded-circle p-3"
-                          style={{width: 100, height: 100}}
+                          style={{ width: 100, height: 100 }}
                           alt=""
                         />
                         <div className="">
@@ -241,6 +269,7 @@ const index = () => {
                     </div>
                   </div>
                 </div>
+
                 <form action="#">
                   <h4 className="mb-5 fw-bold">Leave a Reply</h4>
                   <div className="row g-4">
@@ -558,7 +587,8 @@ const index = () => {
                       }}
                     >
                       <h3 className="text-secondary fw-bold">
-                        <p>Fresh</p> <br></br> <p>Fruits</p><br></br>Banner
+                        <p>Fresh</p> <br></br> <p>Fruits</p>
+                        <br></br>Banner
                       </h3>
                     </div>
                   </div>

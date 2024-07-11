@@ -7,11 +7,12 @@ import "../../../../Front-End/lib/owlcarousel/assets/owl.carousel.min.css"
 import "../../../../Front-End/css/style.css"
 import "./style.css"
 import { Link } from "react-router-dom"
+import useProductStore from "../../store/useProductStore"
 // import { useNavigate } from "react-router-dom"
 const index = () => {
 
+  const { cartItems } = useProductStore();
 
-  // const navigate = useNavigate()
     return(
         <>
         {/* <div class="container-fluid "> */}
@@ -90,7 +91,7 @@ const index = () => {
                     <i class="fa fa-shopping-bag fa-2x primary-color"></i>
                     <span
                       class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                      style={{top: -5, left: 15, height: 20,minWidth: 20}}>3</span>
+                      style={{top: -5, left: 15, height: 20,minWidth: 20}}>{cartItems.length}</span>
                   </a>
                   <a href="#" class="my-auto">
                     <i class="fas fa-user fa-2x primary-color"></i>

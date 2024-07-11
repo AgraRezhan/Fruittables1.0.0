@@ -28,7 +28,7 @@ const Index = () => {
         element: <Shop /> ,
     },
     {
-        path: "/detail",
+        path: "/detail/:id",
         element: <DetailShop /> ,
     },
      ]);
