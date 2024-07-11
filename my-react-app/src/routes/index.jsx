@@ -9,11 +9,11 @@ const Index = () => {
     const router = createBrowserRouter([
         {
         path: "/",
-        element: <HomePage /> ,
+        element: <Login /> ,
     },
     {
-        path: "/login",
-        element: <Login /> ,
+        path: "/home",
+        element: <HomePage /> ,
     },
     {
         path: "/register",

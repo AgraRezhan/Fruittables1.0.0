@@ -31,7 +31,7 @@ const useProductStore = create(
                 set({ user: data.user });
 
                 localStorage.setItem('token', data.data.token);
-                navigate('/');
+                navigate('/home');
                 console.log("ini bagian dari token", data.data.token)
             } catch (error) {
                 console.error('Login error:', error);
