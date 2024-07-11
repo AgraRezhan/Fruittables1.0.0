@@ -3,8 +3,9 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import useProductStore from '../../store/useProductStore';
 
-const index = () => {
-  const { cartItems, fetchCarts, removeCartItem } = useProductStore();
+const Cart = () => {
+  const { cartItems, fetchCarts, removeCartItem, incrementCartItemQuantity, decrementCartItemQuantity } = useProductStore();
+ 
   const flatRate = 3000; // Flat rate untuk shipping
 
   useEffect(() => {
@@ -23,6 +24,14 @@ const index = () => {
 
   const onRemoveItem = (productId) => {
     removeCartItem(productId);    
+  };
+
+  const handleIncrease = (itemId) => {
+    incrementCartItemQuantity(itemId);
+  };
+
+  const handleDecrease = (itemId) => {
+    decrementCartItemQuantity(itemId);
   };
 
   return (
@@ -72,7 +81,9 @@ const index = () => {
                         style={{ width: 100 }}
                       >
                         <div className="input-group-btn">
-                          <button className="btn btn-sm btn-minus rounded-circle bg-light border">
+                          <button 
+                          onClick={() => handleDecrease(item.id)}
+                          className="btn btn-sm btn-minus rounded-circle bg-light border">
                             <i className="fa fa-minus"></i>
                           </button>
                         </div>
@@ -83,7 +94,9 @@ const index = () => {
                           readOnly
                         />
                         <div className="input-group-btn">
-                          <button className="btn btn-sm btn-plus rounded-circle bg-light border">
+                          <button 
+                          onClick={() => handleIncrease(item.id)}
+                          className="btn btn-sm btn-plus rounded-circle bg-light border">
                             <i className="fa fa-plus"></i>
                           </button>
                         </div>
@@ -99,7 +112,7 @@ const index = () => {
                     </td>
                     <td>
                       <button 
-                      onClick={()=> onRemoveItem(item.id)}
+                      onClick={() => onRemoveItem(item.id)}
                       className="btn btn-md rounded-circle bg-light border mt-4">
                         <i className="fa fa-times text-danger"></i>
                       </button>
@@ -154,7 +167,7 @@ const index = () => {
                 </div>
                 <div className="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                   <h5 className="mb-0 ps-4 me-4">Total</h5>
-                  <p className="mb-0 pe-4">$
+                  <p className="mb-0 pe-4">
                   {new Intl.NumberFormat("id-ID", {
                       style: "currency",
                       currency: "IDR",
@@ -177,4 +190,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Cart;

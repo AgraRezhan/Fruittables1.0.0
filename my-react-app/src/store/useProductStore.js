@@ -146,6 +146,93 @@ const useProductStore = create((set, get) => ({
         } catch (error) {
             console.error('Remove cart item error:', error);
         }
+    },
+
+    incrementCartItemQuantity: async(itemId) => {
+        const token = get().token;
+        if (!token) {
+            console.error('Token not found. Unable to update item quantity.');
+            return;
+        }
+
+        const cartItem = get().cartItems.find(item => item.id === itemId);
+        if (!cartItem) {
+            console.error('Cart item not found.');
+            return;
+        }
+
+        const newQuantity = cartItem.quantity + 1;
+
+        try {
+            const response = await axios.put(`http://localhost:8000/api/carts/${itemId}`, {
+                quantity: newQuantity
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const updatedCartItem = response.data.data;
+
+            set((state) => ({
+                cartItems: state.cartItems.map((item) =>
+                    item.id === itemId ? {...item, quantity: newQuantity } : item
+                ),
+                productItems: state.productItems.map((p) =>
+                    p.id === updatedCartItem.product_id ? {...p, stock: p.stock - 1 } : p
+                )
+            }));
+
+            console.log('Incremented cart item quantity:', updatedCartItem);
+        } catch (error) {
+            console.error('Update cart item quantity error:', error);
+        }
+    },
+
+    decrementCartItemQuantity: async(itemId) => {
+        const token = get().token;
+        if (!token) {
+            console.error('Token not found. Unable to update item quantity.');
+            return;
+        }
+
+        const cartItem = get().cartItems.find(item => item.id === itemId);
+        if (!cartItem) {
+            console.error('Cart item not found.');
+            return;
+        }
+
+        if (cartItem.quantity <= 1) {
+            console.error('Quantity must be greater than 0.');
+            return;
+        }
+
+        const newQuantity = cartItem.quantity - 1;
+
+        try {
+            const response = await axios.put(`http://localhost:8000/api/carts/${itemId}`, {
+                quantity: newQuantity
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const updatedCartItem = response.data.data;
+
+            set((state) => ({
+                cartItems: state.cartItems.map((item) =>
+                    item.id === itemId ? {...item, quantity: newQuantity } : item
+                ),
+                productItems: state.productItems.map((p) =>
+                    p.id === updatedCartItem.product_id ? {...p, stock: p.stock + 1 } : p
+                )
+            }));
+
+            console.log('Decremented cart item quantity:', updatedCartItem);
+        } catch (error) {
+            console.error('Update cart item quantity error:', error);
+        }
     }
 }));
 
