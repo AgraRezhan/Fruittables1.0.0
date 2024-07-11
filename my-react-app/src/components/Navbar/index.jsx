@@ -6,8 +6,12 @@ import "../../../../Front-End/lib/lightbox/css/lightbox.min.css"
 import "../../../../Front-End/lib/owlcarousel/assets/owl.carousel.min.css"
 import "../../../../Front-End/css/style.css"
 import "./style.css"
+import { Link } from "react-router-dom"
+// import { useNavigate } from "react-router-dom"
 const index = () => {
 
+
+  // const navigate = useNavigate()
     return(
         <>
         {/* <div class="container-fluid "> */}
@@ -54,25 +58,22 @@ const index = () => {
               </button>
               <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                 <div class="navbar-nav mx-auto">
-                  <a href="index.html" class="nav-item nav-link active">Home</a>
-                  <a href="shop.html" class="nav-item nav-link">Shop</a>
-                  <a href="shop-detail.html" class="nav-item nav-link"
-                    >Shop Detail</a
-                  >
+                  <Link to={'/home'} class="nav-item nav-link active">Home</Link>
+                  <Link to={'/shop'} class="nav-item nav-link">Shop</Link>
+                  <Link to={'/detail'} class="nav-item nav-link"
+                    >Shop Detail</Link>
                   <div class="nav-item dropdown">
                     <a
                       href="#"
                       class="nav-link dropdown-toggle"
                       data-bs-toggle="dropdown"
-                      >Pages</a
-                    >
+                      >Pages</a>
                     <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                      <a href="cart.html" class="dropdown-item">Cart</a>
-                      <a href="chackout.html" class="dropdown-item">Chackout</a>
-                      <a href="testimonial.html" class="dropdown-item"
-                        >Testimonial</a
-                      >
-                      <a href="404.html" class="dropdown-item">404 Page</a>
+                      <Link to={'/cart'} class="dropdown-item">Cart</Link>
+                      <Link to={'/checkout'} class="dropdown-item">Chackout</Link>
+                      <Link to={'/testimoni'} class="dropdown-item"
+                        >Testimonial</Link>
+                      <Link href="404.html" class="dropdown-item">404 Page</Link>
                     </div>
                   </div>
                   <a href="contact.html" class="nav-item nav-link">Contact</a>

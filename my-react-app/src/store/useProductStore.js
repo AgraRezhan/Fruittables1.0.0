@@ -4,6 +4,9 @@ import axios from "axios";
 const useProductStore = create(
     (set, get) => ({
         user: null,
+        token: localStorage.getItem('token') || null,
+        productItems: [],
+        cartItemss: [],
         // Fungsi untuk mendaftarkan pengguna baru
         register: async(userData, navigate, setError) => {
             try {
@@ -47,6 +50,46 @@ const useProductStore = create(
             set({ user: null });
             localStorage.removeItem('token');
         },
+
+        fetchProducts: async() => {
+            try {
+                const token = get().token;
+                if (!token) {
+                    console.error('Token not found. Unable to fetch products.');
+                    return;
+                }
+
+                const response = await axios.get('http://localhost:8000/api/products', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                set({ productItems: response.data.data });
+                console.log("Fetched products successfully:", response.data.data);
+            } catch (error) {
+                console.error('Fetch products error:', error);
+            }
+        },
+        fetchCarts: async() => {
+            try {
+                const token = get().token;
+                if (!token) {
+                    console.error('Token not found. Unable to fetch products.');
+                    return;
+                }
+
+                const response = await axios.get('http://localhost:8000/api/carts', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                set({ cartItems: response.data.data });
+                console.log("Fetched carts successfully:", response.data.data);
+            } catch (error) {
+                console.error('Fetch carts error:', error);
+            }
+        }
+
 
     })
 );

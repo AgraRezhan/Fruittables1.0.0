@@ -5,9 +5,9 @@ import Feature from "../../components/Features";
 import FruitShop from "../../components/Fruits-shop";
 import Visitable from "../../components/Visitable-shop";
 import Testimonial from "../../components/Testimonial"
-import BestSeller from "../../components/BestSeller"
-
+import BestSeller from "../../components/BestSeller";
 const index = () => {
+
 
     return(
         <>
@@ -15,7 +15,7 @@ const index = () => {
         <Navbar />
         <Carousel />
         <Feature />
-        <FruitShop />
+        <FruitShop/>
         <Visitable />
         <BestSeller />
         <Testimonial />
