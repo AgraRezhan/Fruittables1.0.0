@@ -1,0 +1,141 @@
+.body-loginreg {
+    background-image: url("https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    opacity: 0.9;
+}
+
+.register-page {
+    background-image: url("https://images.unsplash.com/photo-1553133642-17d3d6fbb81d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    opacity: 0.9;
+}
+
+.login-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    margin-right: 20px;
+}
+
+.btn-social {
+    font-size: 16px;
+    padding: 8px;
+    width: auto;
+    margin: 5px;
+}
+
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-google,
+.btn-facebook {
+    color: white;
+}
+
+.btn-google {
+    background-color: #dd4b39;
+}
+
+.btn-facebook {
+    background-color: #3b5998;
+}
+
+.register-link {
+    text-align: left;
+    margin-top: 10px;
+}
+
+.login-container,
+.register-container {
+    background-color: #141414;
+    /* Warna hitam untuk latar belakang */
+    color: #fff;
+    /* Warna teks putih */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 400px;
+    /* Lebar maksimal card */
+    margin: 0 auto;
+}
+
+.login-container h2,
+.register-container h2 {
+    font-family: "Arial", sans-serif;
+    /* Ganti font family sesuai kebutuhan */
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #ff6347;
+    /* Warna teks oranye */
+}
+
+.login-container p,
+.register-container p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.login-container button,
+.register-container button {
+    padding: 10px 20px;
+    background-color: #ff6347;
+    /* Warna oranye */
+    color: #fff;
+    /* Warna teks putih */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-container button:hover,
+.register-container button:hover {
+    background-color: #ff4500;
+    /* Warna oranye yang sedikit lebih gelap saat hover */
+}
+
+
+/* Responsive adjustments */
+
+@media (max-width: 768px) {
+    .login-container,
+    .register-container {
+        padding: 15px;
+        max-width: 90%;
+    }
+    body {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-container,
+    .register-container {
+        padding: 10px;
+        max-width: 100%;
+    }
+    body {
+        padding: 5px;
+    }
+}
