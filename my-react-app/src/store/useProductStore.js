@@ -128,6 +128,9 @@ const useProductStore = create((set, get) => ({
         }
 
         try {
+            console.log("itemId: ", itemId);
+            console.log("Cart Items: ", get().cartItems);
+
             await axios.delete(`http://localhost:8000/api/carts/${itemId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -136,6 +139,8 @@ const useProductStore = create((set, get) => ({
 
             const updatedCartItems = get().cartItems.filter(item => item.id !== itemId);
             set({ cartItems: updatedCartItems });
+
+            console.log("ini remove", itemId)
 
             console.log('Removed item from cart:', itemId);
         } catch (error) {

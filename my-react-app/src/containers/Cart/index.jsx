@@ -4,7 +4,7 @@ import Footer from "../../components/Footer";
 import useProductStore from '../../store/useProductStore';
 
 const index = () => {
-  const { cartItems, fetchCarts } = useProductStore();
+  const { cartItems, fetchCarts, removeCartItem } = useProductStore();
   const flatRate = 3000; // Flat rate untuk shipping
 
   useEffect(() => {
@@ -20,6 +20,10 @@ const index = () => {
   const total = subtotal + flatRate;
 
   console.log("ini carts", cartItems);
+
+  const onRemoveItem = (productId) => {
+    removeCartItem(productId);    
+  };
 
   return (
     <>
@@ -94,7 +98,9 @@ const index = () => {
                         </p>
                     </td>
                     <td>
-                      <button className="btn btn-md rounded-circle bg-light border mt-4">
+                      <button 
+                      onClick={()=> onRemoveItem(item.id)}
+                      className="btn btn-md rounded-circle bg-light border mt-4">
                         <i className="fa fa-times text-danger"></i>
                       </button>
                     </td>
