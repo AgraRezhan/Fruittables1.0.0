@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import useUserStore from '../../store/useUserStore';
+import useProductStore from '../../store/useProductStore';
 import "./loginRegister.css";
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const login = useUserStore((state) => state.login);
+    const login = useProductStore((state) => state.login);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');
+        setError(''); // Reset error state before login attempt
         await login({ email, password }, navigate, setError);
     };
 

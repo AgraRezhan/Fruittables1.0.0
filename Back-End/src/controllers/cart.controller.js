@@ -41,9 +41,9 @@ const create = async(req, res, _next) => {
     try {
         const { product_id, quantity } = req.body;
 
-        //melakukan pengecekan terhadapinputan user
+        //melakukan pengecekan terhadap inputan user
         if (!product_id || !quantity) {
-            return res.status(400).send({ message: "permintaan tidak valid" });
+            return res.status(400).send({ message: "Permintaan tidak valid" });
         }
 
         const product = await ProductModel.findOne({
@@ -59,25 +59,47 @@ const create = async(req, res, _next) => {
 
         //melakukan pengecekan pada stok produk
         if (product.stock < quantity) {
-            return res.status(400).send({ message: "stock tidak mencukupi" });
+            return res.status(400).send({ message: "Stock tidak mencukupi" });
         }
 
-        const cart = await CartModel.create({
-            user_id: req.user.id,
-            product_id,
-            quantity
+        //cek apakah item sudah ada di cart
+        const existingCartItem = await CartModel.findOne({
+            where: {
+                user_id: req.user.id,
+                product_id,
+            },
         });
 
-        // await ProductModel.update({
-        //     stock: product.stock - quantity,
-        // }, {
-        //     where: {
-        //         id: product_id,
-        //     },
-        // });
+        let cart;
+
+        if (existingCartItem) {
+            //jika item sudah ada di cart, update quantity
+            const newQuantity = existingCartItem.quantity + quantity;
+
+            //cek stok produk sebelum update
+            if (product.stock < newQuantity) {
+                return res.status(400).send({ message: "Stock tidak mencukupi untuk quantity yang diminta" });
+            }
+
+            await existingCartItem.update({ quantity: newQuantity });
+
+            cart = existingCartItem;
+        } else {
+            //jika item belum ada di cart, tambahkan item baru ke cart
+            cart = await CartModel.create({
+                user_id: req.user.id,
+                product_id,
+                quantity,
+            });
+        }
+
+        //update stok produk
+        await product.update({
+            stock: product.stock - quantity,
+        });
 
         return res.send({
-            message: "Order created successfully",
+            message: "Cart updated successfully",
             data: cart,
         });
     } catch (error) {
@@ -103,10 +125,22 @@ const remove = async(req, res, _next) => {
             },
         });
 
-        //melakukan pengecekan terhadap produk yang akan di hapus dari 
-        //cart berdasarkan id danuser_id dari tabel cart
+        //melakukan pengecekan terhadap produk yang akan dihapus dari cart berdasarkan id dan user_id dari tabel cart
         if (!cartItem) {
             return res.status(404).send({ message: "Cart item not found" });
+        }
+
+        //mengembalikan stok produk sebelum menghapus item dari cart
+        const product = await ProductModel.findOne({
+            where: {
+                id: cartItem.product_id,
+            },
+        });
+
+        if (product) {
+            await product.update({
+                stock: product.stock + cartItem.quantity,
+            });
         }
 
         //melakukan penghapusan data cart
