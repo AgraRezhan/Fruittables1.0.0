@@ -1,10 +1,11 @@
-import Login from "../../containers/Login"
+import Cart from "../../containers/Cart"
+
 const index = () => {
 
-    return (
+    return(
 
         <>
-        <Login />
+        <Cart />
         </>
     )
 }

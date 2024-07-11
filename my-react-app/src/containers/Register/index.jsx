@@ -86,9 +86,8 @@ const index = () => {
               </label>
               <select class="form-select" id="inputGroupSelect01">
                 <option selected>Choose...</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+                <option value="1">customer</option>
+                <option value="2">seller</option>
               </select>
             </div>
             <div className="d-grid gap-2">
