@@ -118,6 +118,29 @@ const useProductStore = create((set, get) => ({
         } catch (error) {
             console.error('Add cart item error:', error);
         }
+    },
+
+    removeCartItem: async(itemId) => {
+        const token = get().token;
+        if (!token) {
+            console.error('Token not found. Unable to remove item from cart.');
+            return;
+        }
+
+        try {
+            await axios.delete(`http://localhost:8000/api/carts/${itemId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const updatedCartItems = get().cartItems.filter(item => item.id !== itemId);
+            set({ cartItems: updatedCartItems });
+
+            console.log('Removed item from cart:', itemId);
+        } catch (error) {
+            console.error('Remove cart item error:', error);
+        }
     }
 }));
 
