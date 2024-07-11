@@ -4,6 +4,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Cart from "../pages/Cart";
 import Shop from "../pages/Shop";
+import DetailShop from "../pages/DetailShop";
 const Index = () => {
     const router = createBrowserRouter([
         {
@@ -25,6 +26,10 @@ const Index = () => {
     {
         path: "/shop",
         element: <Shop /> ,
+    },
+    {
+        path: "/detail",
+        element: <DetailShop /> ,
     },
      ]);
 
