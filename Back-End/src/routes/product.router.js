@@ -4,7 +4,7 @@ const router = express.Router();
 const { storage } = require("../storage/storage");
 const multer = require("multer");
 
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
 const { validateToken } = require("../middlewares/auth")
 const { index, show, create, remove, update } = require("../controllers/product.controller")

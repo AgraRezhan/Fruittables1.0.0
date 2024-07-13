@@ -3,7 +3,7 @@ const {
     Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-    class user extends Model {
+    class shipping extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
@@ -11,36 +11,34 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            user.hasMany(models.product, {
+            shipping.belongsTo(models.user, {
                 foreignKey: "user_id",
-                as: "product"
+                as: "user"
             })
-            user.hasMany(models.cart, {
-                foreignKey: "user_id",
-                as: "cart"
-            })
-            user.hasMany(models.order, {
-                foreignKey: "user_id",
+            shipping.belongsTo(models.order, {
+                foreignKey: "order_id",
                 as: "order"
-            })
-            user.hasMany(models.shipping, {
-                foreignKey: "user_id",
-                as: "shipping"
             })
         }
     }
-    user.init({
-        username: DataTypes.STRING,
+    shipping.init({
+        user_id: DataTypes.INTEGER,
+        order_id: DataTypes.INTEGER,
         first_name: DataTypes.STRING,
         last_name: DataTypes.STRING,
-        email: DataTypes.STRING,
-        password: DataTypes.STRING,
+        company_name: DataTypes.STRING,
         address: DataTypes.STRING,
-        role: DataTypes.STRING
+        city: DataTypes.STRING,
+        postcode: DataTypes.INTEGER,
+        mobile: DataTypes.STRING,
+        email: DataTypes.STRING,
+        note: DataTypes.STRING,
+        payment_method: DataTypes.STRING,
+        total: DataTypes.DECIMAL
     }, {
         sequelize,
-        modelName: 'user',
+        modelName: 'shipping',
         underscored: true,
     });
-    return user;
+    return shipping;
 };

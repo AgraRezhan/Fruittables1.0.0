@@ -5,7 +5,8 @@ const {
     product,
     cart,
     order,
-    order_detail
+    order_detail,
+    shipping
 } = require("../../models");
 
 /** @type {import('sequelize-cli').Migration} */
@@ -20,6 +21,7 @@ module.exports = {
         await cart.destroy({ truncate: true });
         await order.destroy({ truncate: true });
         await order_detail.destroy({ truncate: true });
+        await shipping.destroy({ truncate: true });
 
         await queryInterface.bulkInsert("users", [
             { id: 1, username: "JohnDoe", first_name: "John", last_name: "Doe", email: "johndoe@gmail.com", password: "$2a$12$.HOb8SlLxGN4usHDihNaQe6IFDodXO09pO6Nfi.M96XzcTJ9F1HDu", address: "Jl. Mawar No.3, Bantaeng, Sulawesi Selatan", role: "customer" },
@@ -70,6 +72,11 @@ module.exports = {
             { order_id: 2, product_id: 3, quantity: 4, price: 5000, subtotal: 20000 },
             { order_id: 2, product_id: 4, quantity: 2, price: 35000, subtotal: 70000 },
             { order_id: 3, product_id: 5, quantity: 4, price: 35000, subtotal: 140000 },
+        ]);
+
+        await queryInterface.bulkInsert("shippings", [
+            { user_id: 1, order_id: 1, first_name: "John", last_name: "Doe", company_name: "Fruits", address: "Jl.Mawar", city: "Bantaeng", postcode: 90552, mobile: "+6285396978754", email: "johndoe@gmail.com", note: "Harap pesanan diantarkan sesuai dengan alamata yang tertera", payment_method: "Cash On Dilevery", total: 485000 },
+
         ]);
 
     },

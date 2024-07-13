@@ -5,7 +5,6 @@ const { cart: CartModel, product: ProductModel } = require("../models");
  * @param {import("express").Response} res
  * @param {import("express").NextFunction} _next
  */
-
 const index = async(req, res, _next) => {
     try {
         const cart = await CartModel.findAll({
@@ -30,13 +29,11 @@ const index = async(req, res, _next) => {
     }
 };
 
-
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
  * @param {import("express").NextFunction} _next
  */
-
 const create = async(req, res, _next) => {
     try {
         const { product_id, quantity } = req.body;
@@ -113,7 +110,6 @@ const create = async(req, res, _next) => {
  * @param {import("express").Response} res
  * @param {import("express").NextFunction} _next
  */
-
 const remove = async(req, res, _next) => {
     try {
         const { id } = req.params;
@@ -160,4 +156,62 @@ const remove = async(req, res, _next) => {
     }
 };
 
-module.exports = { index, create, remove };
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} _next
+ */
+const update = async(req, res, _next) => {
+    try {
+        const { id } = req.params;
+        const { quantity } = req.body;
+
+        if (!quantity || quantity <= 0) {
+            return res.status(400).send({ message: "Quantity must be greater than 0" });
+        }
+
+        const cartItem = await CartModel.findOne({
+            where: {
+                id,
+                user_id: req.user.id,
+            },
+        });
+
+        if (!cartItem) {
+            return res.status(404).send({ message: "Cart item not found" });
+        }
+
+        const product = await ProductModel.findOne({
+            where: {
+                id: cartItem.product_id,
+            },
+        });
+
+        if (!product) {
+            return res.status(404).send({ message: "Product not found" });
+        }
+
+        //cek stok produk sebelum update
+        const stockDifference = quantity - cartItem.quantity;
+        if (product.stock < stockDifference) {
+            return res.status(400).send({ message: "Stock tidak mencukupi untuk quantity yang diminta" });
+        }
+
+        await cartItem.update({ quantity });
+
+        //update stok produk
+        await product.update({
+            stock: product.stock - stockDifference,
+        });
+
+        return res.send({
+            message: "Cart item updated successfully",
+            data: cartItem,
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+module.exports = { index, create, remove, update };

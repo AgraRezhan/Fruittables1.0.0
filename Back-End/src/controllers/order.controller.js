@@ -7,40 +7,55 @@ const { order: OrderModel, product: ProductModel, order_detail: OrderDetailModel
  */
 
 const index = async(req, res, next) => {
-    const orders = await OrderModel.findAll({
-        where: {
-            user_id: req.user.id,
-        },
-        include: [{
-            model: OrderDetailModel,
-            as: "order_detail",
+    try {
+        const orders = await OrderModel.findAll({
+            where: {
+                user_id: req.user.id,
+            },
             include: [{
-                model: ProductModel,
-                attributes: ["title"],
-                as: "product",
-            }, ],
-        }, ],
-    });
+                model: OrderDetailModel,
+                as: "order_detail",
+                include: [{
+                    model: ProductModel,
+                    as: "product",
+                }],
+            }],
+        });
 
-    return res.send({
-        message: "Success",
-        data: orders
-            .map((order) => ({
+        const formattedOrders = orders.map((order) => {
+            // Menghitung total quantity dari order_detail
+            const totalQuantity = order.order_detail.reduce((acc, detail) => acc + detail.quantity, 0);
+
+            return {
                 id: order.id,
                 order_date: order.order_date,
                 address: order.address,
+                status: order.status,
+                quantity: totalQuantity, // Menyertakan total quantity dalam respons
                 total: parseFloat(order.total),
                 created_at: order.created_at,
                 items: order.order_detail.map((detail) => ({
-                    product_id: detail.product_id,
-                    title: detail.title,
+                    product_id: detail.product.id,
+                    title: detail.product.title,
+                    description: detail.product.description,
+                    img_url: detail.product.img_url,
+                    price: parseFloat(detail.product.price),
+                    stock: detail.product.stock,
                     quantity: detail.quantity,
-                    price: parseFloat(detail.price),
-                    subtotal: parseFloat(detail.subtotal),
                 })),
-            })),
-    });
+            };
+        });
+
+        return res.send({
+            message: "Success",
+            data: formattedOrders,
+        });
+    } catch (error) {
+        next(error);
+    }
 };
+
+
 
 /**
  * @param {import("express").Request} req
