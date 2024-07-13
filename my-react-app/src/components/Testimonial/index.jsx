@@ -6,7 +6,7 @@ import "owl.carousel/dist/assets/owl.theme.default.css";
 const index = () => {
   return (
     <>
-      <div className="container-fluid testimonial py-5">
+      <div id="testimonial" className="container-fluid testimonial py-5">
         <div className="container py-5">
           <div className="testimonial-header text-center">
             <h4 className="text-primary">Our Testimonial</h4>

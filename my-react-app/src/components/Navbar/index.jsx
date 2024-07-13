@@ -8,8 +8,11 @@ import "../../../../Front-End/css/style.css";
 import "./style.css";
 import { Link, useNavigate } from "react-router-dom";
 import useProductStore from "../../store/useProductStore";
+import { useState } from "react";
 // import { useNavigate } from "react-router-dom"
 const index = () => {
+
+  const[show, setShow] = useState(false)
   const { cartItems, logout } = useProductStore();
   const navigate = useNavigate()
 
@@ -17,6 +20,11 @@ const index = () => {
     logout();
     navigate("/")
   };
+
+  const handleClick = () => {
+    setShow(prevShow => !prevShow); // Menggunakan toggle untuk menampilkan/menyembunyikan komponen "ini click"
+  };
+  
 
   return (
     <>
@@ -89,27 +97,34 @@ const index = () => {
                   <Link to={"/cart"} className="dropdown-item">
                     Cart
                   </Link>
-                  <Link to={"/testimoni"} className="dropdown-item">
+                  <a href="#testimonial" className="dropdown-item">
                     Testimonial
-                  </Link>
-                  <Link href="404.html" className="dropdown-item">
-                    404 Page
-                  </Link>
+                  </a>
                 </div>
               </div>
-              <a href="contact.html" className="nav-item nav-link">
+              <a href="#contact" className="nav-item nav-link">
                 Contact
               </a>
             </div>
             <div className="d-flex m-3 me-0">
+            {
+                show && <input
+                className="form-control border-2 border-secondary w-50  px-4 rounded-pill"
+                type="text"
+                placeholder="Search"
+              />
+              }
               <button
+              onClick={handleClick}
                 className="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
                 data-bs-toggle="modal"
                 data-bs-target="#searchModal"
               >
                 <i className="fas fa-search primary-color"></i>
               </button>
-              <a href="#" className="position-relative me-4 my-auto">
+             
+              
+              <Link to="/cart" className="position-relative me-4 my-auto">
                 <i className="fa fa-shopping-bag fa-2x primary-color"></i>
                 <span
                   className="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
@@ -117,7 +132,7 @@ const index = () => {
                 >
                   {cartItems.length}
                 </span>
-              </a>
+              </Link>
               <a href="#" className="my-auto">
                 <i className="fas fa-user fa-2x primary-color"></i>
               </a>
@@ -137,7 +152,6 @@ const index = () => {
           </div>
         </nav>
       </div>
-      {/* </div> */}
     </>
   );
 };

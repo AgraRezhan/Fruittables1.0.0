@@ -5,7 +5,7 @@ import payment from "../../assets/image/payment.png";
 function index() {
   return (
     <>
-      <div className="container-fluid bg-dark text-white-50 footer pt-5">
+      <div id="contact" className="container-fluid bg-dark text-white-50 footer pt-5">
         <div className="container py-5">
           <div
             className="pb-4 mb-4"
