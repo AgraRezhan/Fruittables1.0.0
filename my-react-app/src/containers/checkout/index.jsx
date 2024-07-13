@@ -1,23 +1,32 @@
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useProductStore from "../../store/useProductStore";
 
-const index = () => {
-  const {
-    cartItems,
-    fetchCarts,
-    removeCartItem,
-    incrementCartItemQuantity,
-    decrementCartItemQuantity,
-    createOrder,
-  } = useProductStore();
+const Index = () => {
+  const [first_name, setFirst_name] = useState("");
+  const [last_name, setLast_name] = useState("");
+  const [company_name, setCompany_name] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [postcode, setPostcode] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+  const [payment_method, setPayment_method] = useState("");
   const [error, setError] = useState("");
+  const [total, setTotal] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { cartItems, fetchCarts, createOrder } = useProductStore();
+
+  useEffect(() => {
+    fetchCarts();
+  }, [fetchCarts]);
+
+  const createShipping = useProductStore((state) => state.createShipping);
   const navigate = useNavigate();
-  const flatRate = 15000;
-  const localPickup = 25000;
-  const freeShipping = 0;
 
   const [shippingOptions, setShippingOptions] = useState({
     freeShipping: false,
@@ -33,6 +42,57 @@ const index = () => {
     }));
   };
 
+  const handlePaymentChange = (e) => {
+    setPayment_method(e.target.value);
+  };
+  const handleCreate = async (e) => {
+    e.preventDefault();
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const shippingData = {
+      first_name,
+      last_name,
+      company_name,
+      address,
+      city,
+      postcode,
+      mobile,
+      email,
+      note,
+      payment_method,
+      total: totalShipping,
+    };
+
+    const orderData = {
+      items: cartItems,
+      total: totalShipping,
+      shipping: { ...shippingOptions, address, city, postcode },
+      payment_method,
+    };
+
+    try {
+      // Kirim data order setelah data shipping berhasil terkirim
+      await createOrder(orderData, navigate, setError);
+      console.log("Order data sent successfully:", orderData);
+      // Kirim data shipping
+      await createShipping(shippingData, navigate, setError);
+      console.log("Shipping data sent successfully:", shippingData);
+
+      navigate("/shop");
+    } catch (error) {
+      console.error("Error sending data:", error);
+      setError("Failed to create order");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const flatRate = 15000;
+  const localPickup = 25000;
+  const freeShipping = 0;
+
   const subtotal = cartItems.reduce(
     (acc, product) => acc + product.quantity * product.product.price,
     0
@@ -41,51 +101,31 @@ const index = () => {
     (shippingOptions.freeShipping ? freeShipping : 0) +
     (shippingOptions.flatRate ? flatRate : 0) +
     (shippingOptions.localPickup ? localPickup : 0);
-  const total = subtotal + totalShippingCost;
-
-  useEffect(() => {
-    fetchCarts();
-  }, [fetchCarts]);
-
-  console.log("ini carts", cartItems);
-
-  const onRemoveItem = (productId) => {
-    removeCartItem(productId);
-  };
-
-  const handleIncrease = (itemId) => {
-    incrementCartItemQuantity(itemId);
-  };
-
-  const handleDecrease = (itemId) => {
-    decrementCartItemQuantity(itemId);
-  };
-
-  const handleCheckout = () => {
-    const orderData = {
-      items: cartItems,
-      // Add other necessary order data like total price, user info, shipping address, etc.
-    };
-
-    createOrder(orderData, navigate, setError);
-  };
+  const totalShipping = subtotal + totalShippingCost;
 
   return (
     <>
       <Navbar />
       <div className="container-fluid py-5">
         <div className="container py-5">
+          {error && <p className="text-danger">{error}</p>}
           <h1 className="mb-4">Billing details</h1>
-          <form action="#">
+          <form onSubmit={handleCreate}>
             <div className="row g-5">
-              <div className="col-md-12 col-lg-6 col-xl-7">
+              <div className="col-md-12 col-lg-6">
                 <div className="row">
                   <div className="col-md-12 col-lg-6">
                     <div className="form-item w-100">
                       <label className="form-label my-3">
                         First Name<sup>*</sup>
                       </label>
-                      <input type="text" className="form-control" />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={first_name}
+                        onChange={(e) => setFirst_name(e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
                   <div className="col-md-12 col-lg-6">
@@ -93,7 +133,13 @@ const index = () => {
                       <label className="form-label my-3">
                         Last Name<sup>*</sup>
                       </label>
-                      <input type="text" className="form-control" />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={last_name}
+                        onChange={(e) => setLast_name(e.target.value)}
+                        required
+                      />
                     </div>
                   </div>
                 </div>
@@ -101,7 +147,13 @@ const index = () => {
                   <label className="form-label my-3">
                     Company Name<sup>*</sup>
                   </label>
-                  <input type="text" className="form-control" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={company_name}
+                    onChange={(e) => setCompany_name(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="form-item">
                   <label className="form-label my-3">
@@ -111,37 +163,58 @@ const index = () => {
                     type="text"
                     className="form-control"
                     placeholder="House Number Street Name"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="form-item">
                   <label className="form-label my-3">
                     Town/City<sup>*</sup>
                   </label>
-                  <input type="text" className="form-control" />
-                </div>
-                <div className="form-item">
-                  <label className="form-label my-3">
-                    Country<sup>*</sup>
-                  </label>
-                  <input type="text" className="form-control" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="form-item">
                   <label className="form-label my-3">
                     Postcode/Zip<sup>*</sup>
                   </label>
-                  <input type="text" className="form-control" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={postcode}
+                    onChange={(e) => setPostcode(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="form-item">
                   <label className="form-label my-3">
                     Mobile<sup>*</sup>
                   </label>
-                  <input type="tel" className="form-control" />
+                  <input
+                    type="tel"
+                    className="form-control"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="form-item">
                   <label className="form-label my-3">
                     Email Address<sup>*</sup>
                   </label>
-                  <input type="email" className="form-control" />
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
                 <div className="form-check my-3">
                   <input
@@ -151,7 +224,7 @@ const index = () => {
                     name="Accounts"
                     value="Accounts"
                   />
-                  <label className="form-check-label" for="Account-1">
+                  <label className="form-check-label" htmlFor="Account-1">
                     Create an account?
                   </label>
                 </div>
@@ -164,18 +237,21 @@ const index = () => {
                     name="Address"
                     value="Address"
                   />
-                  <label className="form-check-label" for="Address-1">
+                  <label className="form-check-label" htmlFor="Address-1">
                     Ship to a different address?
                   </label>
                 </div>
                 <div className="form-item">
                   <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    required
                     name="text"
                     className="form-control"
-                    spellcheck="false"
+                    spellCheck="false"
                     cols="30"
                     rows="11"
-                    placeholder="Oreder Notes (Optional)"
+                    placeholder="Order Notes (Optional)"
                   ></textarea>
                 </div>
               </div>
@@ -205,200 +281,154 @@ const index = () => {
                                 />
                               </div>
                             </th>
-                            <td className="py-5">{product.product.title}</td>
-                            <td className="py-5">
-                              {new Intl.NumberFormat("id-ID", {
-                                style: "currency",
-                                currency: "IDR",
-                              }).format(product.product.price)}
+                            <td className="text-capitalize">
+                              {product.product.name}
                             </td>
-                            <td className="py-5">{product.quantity}</td>
-                            <td className="py-5">
-                              {new Intl.NumberFormat("id-ID", {
-                                style: "currency",
-                                currency: "IDR",
-                              }).format(
-                                product.quantity * product.product.price
-                              )}
+                            <td>
+                              <i className="fa-solid fa-indian-rupee-sign"></i>
+                              {product.product.price}
+                            </td>
+                            <td>{product.quantity}</td>
+                            <td>
+                              <i className="fa-solid fa-indian-rupee-sign"></i>
+                              {product.quantity * product.product.price}
                             </td>
                           </tr>
                         ))}
-
                       <tr>
-                        <th scope="row"></th>
-                        <td className="py-5"></td>
-                        <td className="py-5"></td>
-                        <td className="py-5">
-                          <p className="mb-0 text-dark py-3">Subtotal</p>
-                        </td>
-                        <td className="py-5">
-                          <div className="py-3 border-bottom border-top">
-                            <p className="mb-0 text-dark">
-                              {new Intl.NumberFormat("id-ID", {
-                                style: "currency",
-                                currency: "IDR",
-                              }).format(subtotal)}
-                            </p>
-                          </div>
-                        </td>
+                        <td colSpan="4">Subtotal:</td>
+                        <td>{subtotal}</td>
                       </tr>
-
                       <tr>
-                        <th scope="row"></th>
-                        <td className="py-5">
-                          <p className="mb-0 text-dark py-4">Shipping</p>
-                        </td>
-                        <td colSpan="3" className="py-5">
-                          <div className="form-check text-start">
-                            <input
-                              type="checkbox"
-                              className="form-check-input bg-primary border-0"
-                              id="Shipping-1"
-                              name="freeShipping"
-                              onChange={handleShippingChange}
-                              checked={shippingOptions.freeShipping}
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="Shipping-1"
-                            >
-                              Free Shipping
-                            </label>
-                          </div>
-                          <div className="form-check text-start">
-                            <input
-                              type="checkbox"
-                              className="form-check-input bg-primary border-0"
-                              id="Shipping-2"
-                              name="flatRate"
-                              onChange={handleShippingChange}
-                              checked={shippingOptions.flatRate}
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="Shipping-2"
-                            >
-                              Flat rate: Rp15.000
-                            </label>
-                          </div>
-                          <div className="form-check text-start">
-                            <input
-                              type="checkbox"
-                              className="form-check-input bg-primary border-0"
-                              id="Shipping-3"
-                              name="localPickup"
-                              onChange={handleShippingChange}
-                              checked={shippingOptions.localPickup}
-                            />
-                            <label
-                              className="form-check-label"
-                              htmlFor="Shipping-3"
-                            >
-                              Local Pickup: Rp25.000
-                            </label>
-                          </div>
-                        </td>
+                        <td colSpan="4">Shipping:</td>
+                        <td>{totalShippingCost}</td>
                       </tr>
-
                       <tr>
-                        <th scope="row"></th>
-                        <td className="py-5">
-                          <p className="mb-0 text-dark text-uppercase py-3">
-                            TOTAL
-                          </p>
-                        </td>
-                        <td className="py-5"></td>
-                        <td className="py-5"></td>
-                        <td className="py-5">
-                          <div className="py-3 border-bottom border-top">
-                            <p className="mb-0 text-dark">
-                              {new Intl.NumberFormat("id-ID", {
-                                style: "currency",
-                                currency: "IDR",
-                              }).format(total)}
-                            </p>
-                          </div>
-                        </td>
+                        <td colSpan="4">Total:</td>
+                        <td>{totalShipping}</td>
                       </tr>
                     </tbody>
                   </table>
-                </div>
-                <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                  <div className="col-12">
-                    <div className="form-check text-start my-3">
-                      <input
-                        type="checkbox"
-                        className="form-check-input bg-primary border-0"
-                        id="Transfer-1"
-                        name="Transfer"
-                        value="Transfer"
-                      />
-                      <label className="form-check-label" for="Transfer-1">
-                        Direct Bank Transfer
-                      </label>
-                    </div>
-                    <p className="text-start text-dark">
-                      Make your payment directly into our bank account. Please
-                      use your Order ID as the payment reference. Your order
-                      will not be shipped until the funds have cleared in our
-                      account.
-                    </p>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="FreeShipping"
+                      name="freeShipping"
+                      checked={shippingOptions.freeShipping}
+                      onChange={handleShippingChange}
+                    />
+                    <label className="form-check-label" htmlFor="FreeShipping">
+                      Free Shipping
+                    </label>
                   </div>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="FlatRate"
+                      name="flatRate"
+                      checked={shippingOptions.flatRate}
+                      onChange={handleShippingChange}
+                    />
+                    <label className="form-check-label" htmlFor="FlatRate">
+                      Flat Rate: $15.00
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="LocalPickup"
+                      name="localPickup"
+                      checked={shippingOptions.localPickup}
+                      onChange={handleShippingChange}
+                    />
+                    <label className="form-check-label" htmlFor="LocalPickup">
+                      Local Pickup: $25.00
+                    </label>
+                  </div>
+                  <hr />
+                  <h5 className="mb-4">Payment</h5>
+                  <div className="form-check text-start my-3">
+                    <input
+                      type="radio"
+                      className="form-check-input bg-primary border-0"
+                      id="Transfer-1"
+                      name="payment_method"
+                      value="Transfer"
+                      checked={payment_method === "Transfer"}
+                      onChange={handlePaymentChange}
+                    />
+                    <label className="form-check-label" htmlFor="Transfer-1">
+                      Direct Bank Transfer
+                    </label>
+                  </div>
+                  <p className="text-start text-dark">
+                    Make your payment directly into our bank account. Please use
+                    your Order ID as the payment reference. Your order will not
+                    be shipped until the funds have cleared in our account.
+                  </p>
                 </div>
+
                 <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                   <div className="col-12">
                     <div className="form-check text-start my-3">
                       <input
-                        type="checkbox"
+                        type="radio"
                         className="form-check-input bg-primary border-0"
                         id="Payments-1"
-                        name="Payments"
-                        value="Payments"
+                        name="payment_method"
+                        value="Check Payments"
+                        checked={payment_method === "Check Payments"}
+                        onChange={handlePaymentChange}
                       />
-                      <label className="form-check-label" for="Payments-1">
+                      <label className="form-check-label" htmlFor="Payments-1">
                         Check Payments
                       </label>
                     </div>
                   </div>
                 </div>
+
                 <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
                   <div className="col-12">
                     <div className="form-check text-start my-3">
                       <input
-                        type="checkbox"
+                        type="radio"
                         className="form-check-input bg-primary border-0"
                         id="Delivery-1"
-                        name="Delivery"
-                        value="Delivery"
+                        name="payment_method"
+                        value="Cash On Delivery"
+                        checked={payment_method === "Cash On Delivery"}
+                        onChange={handlePaymentChange}
                       />
-                      <label className="form-check-label" for="Delivery-1">
+                      <label className="form-check-label" htmlFor="Delivery-1">
                         Cash On Delivery
                       </label>
                     </div>
                   </div>
-                </div>
-                <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                  <div className="col-12">
-                    <div className="form-check text-start my-3">
-                      <input
-                        type="checkbox"
-                        className="form-check-input bg-primary border-0"
-                        id="Paypal-1"
-                        name="Paypal"
-                        value="Paypal"
-                      />
-                      <label className="form-check-label" for="Paypal-1">
-                        Paypal
-                      </label>
-                    </div>
+
+                  <hr />
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="TermsConditions"
+                      required
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="TermsConditions"
+                    >
+                      I have read and agree to the terms and conditions
+                    </label>
                   </div>
-                </div>
-                <div className="row g-4 text-center align-items-center justify-content-center pt-4">
                   <button
-                    type="button"
-                    className="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary"
+                    type="submit"
+                    className="btn btn-primary w-100 py-3 mt-4"
+                    disabled={isSubmitting}
                   >
-                    Place Order
+                    {isSubmitting ? "Placing Order..." : "Place Order"}
                   </button>
                 </div>
               </div>
@@ -411,4 +441,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;

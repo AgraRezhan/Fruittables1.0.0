@@ -1,25 +1,29 @@
-import React, { useState } from 'react';
-import useProductStore from '../../store/useProductStore'; 
-import {Link, useNavigate} from "react-router-dom";
+import React, { useState } from "react";
+import useProductStore from "../../store/useProductStore";
+import { Link, useNavigate } from "react-router-dom";
 import "../Login/loginRegister.css";
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [first_name, setFirst_name] = useState('');
-  const [last_name, setLast_name] = useState('');
-  const [address, setAddress] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [first_name, setFirst_name] = useState("");
+  const [last_name, setLast_name] = useState("");
+  const [address, setAddress] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [error, setError] = useState("");
 
   const register = useProductStore((state) => state.register);
 
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
-      e.preventDefault();
-      await register({ username, first_name, last_name, email, password, role }, navigate,setError);
+    e.preventDefault();
+    await register(
+      { username, first_name, last_name, email, password, role },
+      navigate,
+      setError
+    );
   };
 
   return (
@@ -29,7 +33,7 @@ const Register = () => {
           Register
         </h2>
         <form onSubmit={handleRegister}>
-        {error && <div className="alert alert-danger">{error}</div>}
+          {error && <div className="alert alert-danger">{error}</div>}
           <div className="mb-3">
             <label htmlFor="new-first-name" className="form-label">
               First Name:

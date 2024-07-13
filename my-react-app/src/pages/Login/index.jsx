@@ -1,12 +1,10 @@
-import Login from "../../containers/Login"
+import Login from "../../containers/Login";
 const index = () => {
-
-    return (
-
-        <>
-        <Login />
-        </>
-    )
-}
+  return (
+    <>
+      <Login />
+    </>
+  );
+};
 
 export default index;

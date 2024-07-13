@@ -3,67 +3,82 @@ import axios from "axios";
 
 const useProductStore = create((set, get) => ({
     user: null,
-    token: localStorage.getItem('token') || null,
+    token: localStorage.getItem("token") || null,
     productItems: [],
     cartItems: [],
     orders: [],
+    shippings: [],
 
     register: async(userData, navigate, setError) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/auth/register', userData);
+            const response = await axios.post(
+                "http://localhost:8000/api/auth/register",
+                userData
+            );
             const data = response.data;
             set({ user: data.user });
-            localStorage.setItem('token', data.token);
-            navigate('/login');
+            localStorage.setItem("token", data.token);
+            navigate("/");
         } catch (error) {
-            console.error('Registration error:', error);
-            if (error.response && error.response.data && error.response.data.message) {
+            console.error("Registration error:", error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
                 setError(error.response.data.message);
             } else {
-                setError('Registration failed. Please try again.');
+                setError("Registration failed. Please try again.");
             }
         }
     },
 
     login: async(credentials, navigate, setError) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/auth/login', credentials);
+            const response = await axios.post(
+                "http://localhost:8000/api/auth/login",
+                credentials
+            );
             const data = response.data;
             set({ user: data.user });
-            localStorage.setItem('token', data.data.token);
-            navigate('/home');
+            localStorage.setItem("token", data.data.token);
+            navigate("/home");
         } catch (error) {
-            console.error('Login error:', error);
-            if (error.response && error.response.data && error.response.data.message) {
+            console.error("Login error:", error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
                 setError(error.response.data.message);
             } else {
-                setError('Login failed. Please try again.');
+                setError("Login failed. Please try again.");
             }
         }
     },
 
     logout: () => {
         set({ user: null });
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
     },
 
     fetchProducts: async() => {
         try {
             const token = get().token;
             if (!token) {
-                console.error('Token not found. Unable to fetch products.');
+                console.error("Token not found. Unable to fetch products.");
                 return;
             }
 
-            const response = await axios.get('http://localhost:8000/api/products', {
+            const response = await axios.get("http://localhost:8000/api/products", {
                 headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
             set({ productItems: response.data.data });
             console.log("Fetched products successfully:", response.data.data);
         } catch (error) {
-            console.error('Fetch products error:', error);
+            console.error("Fetch products error:", error);
         }
     },
 
@@ -71,42 +86,44 @@ const useProductStore = create((set, get) => ({
         try {
             const token = get().token;
             if (!token) {
-                console.error('Token not found. Unable to fetch products.');
+                console.error("Token not found. Unable to fetch products.");
                 return;
             }
 
-            const response = await axios.get('http://localhost:8000/api/carts', {
+            const response = await axios.get("http://localhost:8000/api/carts", {
                 headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
             set({ cartItems: response.data.data });
             console.log("Fetched carts successfully:", response.data.data);
         } catch (error) {
-            console.error('Fetch carts error:', error);
+            console.error("Fetch carts error:", error);
         }
     },
 
     addCartItem: async(item) => {
         if (!item || !item.id) {
-            console.error('Invalid product item:', item);
+            console.error("Invalid product item:", item);
             return;
         }
 
-        console.log('Adding item to cart:', item);
+        console.log("Adding item to cart:", item);
 
         const token = get().token;
         if (!token) {
-            console.error('Token not found. Unable to add item to cart.');
+            console.error("Token not found. Unable to add item to cart.");
             return;
         }
 
         try {
-            const response = await axios.post('http://localhost:8000/api/carts', { product_id: item.id, quantity: 1 }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            const response = await axios.post(
+                "http://localhost:8000/api/carts", { product_id: item.id, quantity: 1 }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
             const updatedCartItems = response.data.data;
             set({ cartItems: updatedCartItems });
 
@@ -115,16 +132,16 @@ const useProductStore = create((set, get) => ({
                     p.id === item.id ? {...p, stock: p.stock - 1 } : p
                 ),
             }));
-            console.log('Updated cart items:', updatedCartItems);
+            console.log("Updated cart items:", updatedCartItems);
         } catch (error) {
-            console.error('Add cart item error:', error);
+            console.error("Add cart item error:", error);
         }
     },
 
     removeCartItem: async(itemId) => {
         const token = get().token;
         if (!token) {
-            console.error('Token not found. Unable to remove item from cart.');
+            console.error("Token not found. Unable to remove item from cart.");
             return;
         }
 
@@ -134,44 +151,48 @@ const useProductStore = create((set, get) => ({
 
             await axios.delete(`http://localhost:8000/api/carts/${itemId}`, {
                 headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
 
-            const updatedCartItems = get().cartItems.filter(item => item.id !== itemId);
+            const updatedCartItems = get().cartItems.filter(
+                (item) => item.id !== itemId
+            );
             set({ cartItems: updatedCartItems });
 
-            console.log("ini remove", itemId)
+            console.log("ini remove", itemId);
 
-            console.log('Removed item from cart:', itemId);
+            console.log("Removed item from cart:", itemId);
         } catch (error) {
-            console.error('Remove cart item error:', error);
+            console.error("Remove cart item error:", error);
         }
     },
 
     incrementCartItemQuantity: async(itemId) => {
         const token = get().token;
         if (!token) {
-            console.error('Token not found. Unable to update item quantity.');
+            console.error("Token not found. Unable to update item quantity.");
             return;
         }
 
-        const cartItem = get().cartItems.find(item => item.id === itemId);
+        const cartItem = get().cartItems.find((item) => item.id === itemId);
         if (!cartItem) {
-            console.error('Cart item not found.');
+            console.error("Cart item not found.");
             return;
         }
 
         const newQuantity = cartItem.quantity + 1;
 
         try {
-            const response = await axios.put(`http://localhost:8000/api/carts/${itemId}`, {
-                quantity: newQuantity
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            const response = await axios.put(
+                `http://localhost:8000/api/carts/${itemId}`, {
+                    quantity: newQuantity,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
 
             const updatedCartItem = response.data.data;
 
@@ -181,43 +202,45 @@ const useProductStore = create((set, get) => ({
                 ),
                 productItems: state.productItems.map((p) =>
                     p.id === updatedCartItem.product_id ? {...p, stock: p.stock - 1 } : p
-                )
+                ),
             }));
 
-            console.log('Incremented cart item quantity:', updatedCartItem);
+            console.log("Incremented cart item quantity:", updatedCartItem);
         } catch (error) {
-            console.error('Update cart item quantity error:', error);
+            console.error("Update cart item quantity error:", error);
         }
     },
 
     decrementCartItemQuantity: async(itemId) => {
         const token = get().token;
         if (!token) {
-            console.error('Token not found. Unable to update item quantity.');
+            console.error("Token not found. Unable to update item quantity.");
             return;
         }
 
-        const cartItem = get().cartItems.find(item => item.id === itemId);
+        const cartItem = get().cartItems.find((item) => item.id === itemId);
         if (!cartItem) {
-            console.error('Cart item not found.');
+            console.error("Cart item not found.");
             return;
         }
 
         if (cartItem.quantity <= 1) {
-            console.error('Quantity must be greater than 0.');
+            console.error("Quantity must be greater than 0.");
             return;
         }
 
         const newQuantity = cartItem.quantity - 1;
 
         try {
-            const response = await axios.put(`http://localhost:8000/api/carts/${itemId}`, {
-                quantity: newQuantity
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            const response = await axios.put(
+                `http://localhost:8000/api/carts/${itemId}`, {
+                    quantity: newQuantity,
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
 
             const updatedCartItem = response.data.data;
 
@@ -227,44 +250,51 @@ const useProductStore = create((set, get) => ({
                 ),
                 productItems: state.productItems.map((p) =>
                     p.id === updatedCartItem.product_id ? {...p, stock: p.stock + 1 } : p
-                )
+                ),
             }));
 
-            console.log('Decremented cart item quantity:', updatedCartItem);
+            console.log("Decremented cart item quantity:", updatedCartItem);
         } catch (error) {
-            console.error('Update cart item quantity error:', error);
+            console.error("Update cart item quantity error:", error);
         }
     },
 
     createOrder: async(orderData, navigate, setError) => {
         const token = get().token;
         if (!token) {
-            console.error('Token not found. Unable to create order.');
+            console.error("Token not found. Unable to create order.");
             return;
         }
 
         try {
-            const response = await axios.post('http://localhost:8000/api/orders', orderData, {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            const response = await axios.post(
+                "http://localhost:8000/api/orders",
+                orderData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 }
-            });
+            );
             const newOrder = response.data;
 
             // Update orders in the state
-            set(state => ({
+            set((state) => ({
                 orders: [...state.orders, newOrder],
-                cartItems: [] // Clear the cart after successful order creation
+                cartItems: [], // Clear the cart after successful order creation
             }));
 
             // Redirect to order success page
-            navigate('/shop');
+            navigate("/shop");
         } catch (error) {
-            console.error('Create order error:', error);
-            if (error.response && error.response.data && error.response.data.message) {
+            console.error("Create order error:", error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
                 setError(error.response.data.message);
             } else {
-                setError('Order creation failed. Please try again.');
+                setError("Order creation failed. Please try again.");
             }
         }
     },
@@ -272,22 +302,133 @@ const useProductStore = create((set, get) => ({
         try {
             const token = get().token;
             if (!token) {
-                console.error('Token not found. Unable to fetch products.');
+                console.error("Token not found. Unable to fetch products.");
                 return;
             }
 
-            const response = await axios.get('http://localhost:8000/api/orders', {
+            const response = await axios.get("http://localhost:8000/api/orders", {
                 headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                    Authorization: `Bearer ${token}`,
+                },
             });
             set({ orders: response.data.data });
             console.log("Fetched carts successfully:", response.data.data);
         } catch (error) {
-            console.error('Fetch carts error:', error);
+            console.error("Fetch carts error:", error);
         }
     },
 
+    createShipping: async(shippingData, navigate, setError) => {
+        const token = get().token;
+        if (!token) {
+            console.error("Token not found. Unable to create shipping.");
+            return;
+        }
+
+        try {
+            const response = await axios.post(
+                "http://localhost:8000/api/shippings",
+                shippingData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const newShipping = response.data.data;
+
+            // Update shippings in the state
+            set((state) => ({
+                shippings: [...state.shippings, newShipping],
+            }));
+            navigate("/order");
+        } catch (error) {
+            console.error("Create shipping error:", error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
+                setError(error.response.data.message);
+            } else {
+                setError("Shipping creation failed. Please try again.");
+            }
+        }
+    },
+
+    updateShipping: async(shippingId, shippingData, navigate, setError) => {
+        const token = get().token;
+        if (!token) {
+            console.error("Token not found. Unable to update shipping.");
+            return;
+        }
+
+        try {
+            const response = await axios.put(
+                `http://localhost:8000/api/shippings/${shippingId}`,
+                shippingData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const updatedShipping = response.data.data;
+
+            // Update shippings in the state
+            set((state) => ({
+                shippings: state.shippings.map((shipping) =>
+                    shipping.id === shippingId ? updatedShipping : shipping
+                ),
+            }));
+
+            navigate("/order");
+        } catch (error) {
+            console.error("Update shipping error:", error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
+                setError(error.response.data.message);
+            } else {
+                setError("Shipping update failed. Please try again.");
+            }
+        }
+    },
+    cancelOrder: async(orderId, setError) => {
+        const token = get().token;
+        if (!token) {
+            console.error("Token not found. Unable to cancel order.");
+            setError("Token not found. Unable to cancel order.");
+            return;
+        }
+        console.log("order id ini", orderId);
+        try {
+            const response = await axios.post(
+                `http://localhost:8000/api/orders/${orderId}/cancel`,
+                null, // No body payload required for cancellation
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            console.log("Cancel order response:", response.data);
+            return response.data; // You may return additional data if needed
+        } catch (error) {
+            console.error("Cancel order error:", error);
+            if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ) {
+                setError(error.response.data.message);
+            } else {
+                setError("Failed to cancel order. Please try again.");
+            }
+            throw error; // Re-throw error to handle in caller function
+        }
+    },
 }));
 
 export default useProductStore;

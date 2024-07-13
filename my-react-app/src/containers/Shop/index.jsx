@@ -5,12 +5,19 @@ import { useEffect } from "react";
 import dayjs from "dayjs";
 
 const Index = () => {
-  const { fetchOrder, orders } = useProductStore();
+  const { fetchOrder, orders, cancelOrder} = useProductStore();
 
   useEffect(() => {
     fetchOrder();
   }, [fetchOrder]);
 
+
+  const handleCancelOrder = (orderId) => {
+    cancelOrder(orderId); 
+    location.reload() 
+  };
+
+  // console.log("order id", orderId)
   return (
     <>
       <Navbar />
@@ -74,8 +81,10 @@ const Index = () => {
                         </p>
                       </td>
                       <td>
-                        <button className="btn border border-secondary rounded-pill px-3 text-primary btn-md rounded-circle bg-light border mt-4">
-                          Detail
+                        <button 
+                        onClick={()=> handleCancelOrder(order.id)}
+                        className="btn border border-secondary rounded-pill px-3 text-primary btn-md rounded-circle bg-light border mt-4">
+                          cancel
                         </button>
                       </td>
                     </tr>

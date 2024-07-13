@@ -104,7 +104,9 @@ const index = () => {
                             <div className="rounded position-relative fruite-product border border-secondary">
                               <div className="fruite-img">
                                 <button
-                                onClick={()=> navigate(`/detail/${product.id}`)}
+                                  onClick={() =>
+                                    navigate(`/detail/${product.id}`)
+                                  }
                                 >
                                   <img
                                     src={product.img_url}

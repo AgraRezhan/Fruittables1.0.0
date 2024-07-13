@@ -1,13 +1,11 @@
-import Shop from "../../containers/Shop"
+import Shop from "../../containers/Shop";
 
 const index = () => {
-
-    return(
-
-        <>
-        <Shop />
-        </>
-    )
-}
+  return (
+    <>
+      <Shop />
+    </>
+  );
+};
 
 export default index;

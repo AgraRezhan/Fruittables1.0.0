@@ -1,13 +1,11 @@
-import Cart from "../../containers/Cart"
+import Cart from "../../containers/Cart";
 
 const index = () => {
-
-    return(
-
-        <>
-        <Cart />
-        </>
-    )
-}
+  return (
+    <>
+      <Cart />
+    </>
+  );
+};
 
 export default index;

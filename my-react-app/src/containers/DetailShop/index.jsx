@@ -9,7 +9,7 @@ const index = () => {
   const { id } = useParams();
   const token = localStorage.getItem("token");
   const [products, setProducts] = useState(""); // Mulai dengan null untuk menunjukkan bahwa data belum diambil
-  const {addCartItem} = useProductStore();
+  const { addCartItem } = useProductStore();
 
   console.log("ini id", id);
 
@@ -38,7 +38,7 @@ const index = () => {
   const handleAddToCart = (product) => {
     if (product && product.id) {
       addCartItem(product);
-      alert("berhasil ditambahkan")
+      alert("berhasil ditambahkan");
     } else {
       console.error("Invalid product:", product);
     }
@@ -80,25 +80,9 @@ const index = () => {
                   <div
                     className="input-group quantity mb-5"
                     style={{ width: 100 }}
-                  >
-                    {/* <div className="input-group-btn">
-                      <button className="btn btn-sm btn-minus rounded-circle bg-light border">
-                        <i className="fa fa-minus"></i>
-                      </button>
-                    </div> */}
-                    {/* <input
-                      type="text"
-                      className="form-control form-control-sm text-center border-0"
-                      value="1"
-                    />
-                    <div className="input-group-btn">
-                      <button className="btn btn-sm btn-plus rounded-circle bg-light border">
-                        <i className="fa fa-plus"></i>
-                      </button>
-                    </div> */}
-                  </div>
+                  ></div>
                   <button
-                    onClick={()=> handleAddToCart(products)}
+                    onClick={() => handleAddToCart(products)}
                     className="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
@@ -142,9 +126,7 @@ const index = () => {
                       role="tabpanel"
                       aria-labelledby="nav-about-tab"
                     >
-                      <p>
-                       {products.description}
-                      </p>
+                      <p>{products.description}</p>
                       <div className="px-2">
                         <div className="row g-4">
                           <div className="col-6">
