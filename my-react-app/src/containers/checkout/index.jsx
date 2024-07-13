@@ -281,8 +281,8 @@ const Index = () => {
                                 />
                               </div>
                             </th>
-                            <td className="text-capitalize">
-                              {product.product.name}
+                            <td className="text-capitalize ">
+                              {product.product.title}
                             </td>
                             <td>
                               <i className="fa-solid fa-indian-rupee-sign"></i>

@@ -85,7 +85,7 @@ const Cart = () => {
                         </div>
                       </th>
                       <td>
-                        <p className="mb-0 mt-4">{item.product.title}</p>
+                        <p className="">{item.product.title}</p>
                       </td>
                       <td>
                         <p className="mb-0 mt-4">
