@@ -22,36 +22,51 @@ const Cart = () => {
     fetchCarts();
   }, [fetchCarts]);
 
-  // Hitung subtotal
-  const subtotal = cartItems.reduce((sum, item) => {
+  useEffect(() => {
+    console.log("cartItems:", cartItems);
+  }, [cartItems]);
+
+  const subtotal = Array.isArray(cartItems) ? cartItems.reduce((sum, item) => {
     return sum + item.product.price * item.quantity;
-  }, 0);
+  }, 0) : 0;
 
-  // Hitung total dengan mengurangi flat rate dari subtotal
   const total = subtotal + flatRate;
-
-  console.log("ini carts", cartItems);
 
   const onRemoveItem = (productId) => {
     removeCartItem(productId);
   };
 
   const handleIncrease = (itemId) => {
-    incrementCartItemQuantity(itemId);
+    // Temukan item berdasarkan itemId
+    const item = cartItems.find((item) => item.id === itemId);
+  
+    if (item) {
+      // Jika stok produk sama dengan 0, munculkan alert
+      if (item.product.stock === 0) {
+        alert(`Stok produk ${item.product.title} tidak mencukupi!`);
+      } else {
+        // Jika stok mencukupi, tingkatkan jumlah item
+        incrementCartItemQuantity(itemId);
+      }
+    } else {
+      console.log("Item tidak ditemukan");
+    }
   };
 
   const handleDecrease = (itemId) => {
     decrementCartItemQuantity(itemId);
   };
 
-  // const handleCheckout = () => {
-  //   const orderData = {
-  //     items: cartItems,
-  //     // Add other necessary order data like total price, user info, shipping address, etc.
-  //   };
+  const handleCheckout = () => {
+    for (let i = 0; i < cartItems.length; i++) {
+      if (cartItems[i].product.stock < cartItems[i].quantity) {
+        alert(`Stok produk ${cartItems[i].product.title} tidak mencukupi!`);
+        return; // Hentikan proses jika stok tidak mencukupi
+      }
+    }
 
-  //   createOrder(orderData, navigate, setError);
-  // };
+    navigate("/checkout");
+  };
 
   return (
     <>
@@ -71,7 +86,7 @@ const Cart = () => {
                 </tr>
               </thead>
               <tbody>
-                {cartItems &&
+                {Array.isArray(cartItems) &&
                   cartItems.map((item) => (
                     <tr key={item.id}>
                       <th scope="row">
@@ -199,7 +214,8 @@ const Cart = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => navigate("/checkout")}
+                  onClick={handleCheckout}
+                  // onClick={() => navigate("/checkout")}
                   className="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4"
                   type="button"
                 >

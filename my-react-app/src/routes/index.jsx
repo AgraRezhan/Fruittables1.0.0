@@ -7,7 +7,9 @@ import Cart from '../pages/Cart';
 import Shop from '../pages/Shop';
 import DetailShop from '../pages/DetailShop';
 import Checkout from '../pages/Checkout';
+import OrderDetail from "../pages/OrderDetail";
 import ProtectedRoute from '../store/ProtectedRoute';
+import UpdateBilling from "../pages/Update";
 
 const Index = () => {
   const router = createBrowserRouter([
@@ -56,6 +58,22 @@ const Index = () => {
       element: (
         <ProtectedRoute>
           <Checkout />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/orderdetail/:id',
+      element: (
+        <ProtectedRoute>
+          <OrderDetail />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/update/:id',
+      element: (
+        <ProtectedRoute>
+          <UpdateBilling />
         </ProtectedRoute>
       ),
     },

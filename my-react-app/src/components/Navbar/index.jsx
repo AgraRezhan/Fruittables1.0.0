@@ -8,13 +8,17 @@ import "../../../../Front-End/css/style.css";
 import "./style.css";
 import { Link, useNavigate } from "react-router-dom";
 import useProductStore from "../../store/useProductStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom"
 const index = () => {
 
   const[show, setShow] = useState(false)
-  const { cartItems, logout } = useProductStore();
+  const { fetchCarts, cartItems, logout } = useProductStore();
   const navigate = useNavigate()
+
+  useEffect(() => {
+    fetchCarts()
+  },[fetchCarts])
 
   const handleLogout = () => {
     logout();

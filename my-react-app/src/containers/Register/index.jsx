@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useProductStore from "../../store/useProductStore";
 import { Link, useNavigate } from "react-router-dom";
 import "../Login/loginRegister.css";
@@ -13,18 +13,25 @@ const Register = () => {
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
 
+  
+  const errorMessage = useProductStore((state) => state.errorMessage);
+
   const register = useProductStore((state) => state.register);
 
   const navigate = useNavigate();
 
+  
   const handleRegister = async (e) => {
     e.preventDefault();
-    await register(
-      { username, first_name, last_name, email, password, role },
-      navigate,
-      setError
-    );
-  };
+
+    await register({ username, first_name, last_name, email, password,address, role },
+          navigate,      
+          setError,);
+
+   
+};
+
+ 
 
   return (
     <div className="body-loginreg">
@@ -33,6 +40,7 @@ const Register = () => {
           Register
         </h2>
         <form onSubmit={handleRegister}>
+        {errorMessage == "Password is too weak" && <div className="alert alert-danger">{errorMessage}</div>}
           {error && <div className="alert alert-danger">{error}</div>}
           <div className="mb-3">
             <label htmlFor="new-first-name" className="form-label">

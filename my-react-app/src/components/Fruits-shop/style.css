@@ -1,0 +1,25 @@
+.fruite-product {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.fruite-img img {
+    max-height: 200px;
+    /* Atur sesuai kebutuhan Anda */
+    object-fit: cover;
+}
+
+.fruite-product-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.fruite-product-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

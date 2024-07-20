@@ -5,9 +5,13 @@ const useProductStore = create((set, get) => ({
     user: null,
     token: localStorage.getItem("token") || null,
     productItems: [],
+    productDesc: [],
     cartItems: [],
     orders: [],
     shippings: [],
+    errorMessage: '',
+
+    setErrorMessage: (message) => set({ errorMessage: message }),
 
     register: async(userData, navigate, setError) => {
         try {
@@ -16,23 +20,31 @@ const useProductStore = create((set, get) => ({
                 userData
             );
             const data = response.data;
-            set({ user: data.user });
+            set({ user: data.data });
             localStorage.setItem("token", data.token);
-            navigate("/");
+            console.log("ini register", data.message); // Menampilkan pesan sukses
+
+            if (data.message === "Password is too weak") {
+                set({ errorMessage: "Password is too weak" });
+            } else
+            // if (data.message === "User successfully registered")
+            {
+                // set({ errorMessage: '' });
+                set({ errorMessage: "Login success" });
+                navigate("/")
+
+            }
+
         } catch (error) {
             console.error("Registration error:", error);
-            if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-            ) {
+            if (error.response && error.response.data && error.response.data.message) {
+                set({ errorMessage: error.response.data.message }); // Mengambil pesan error dari response
                 setError(error.response.data.message);
             } else {
-                setError("Registration failed. Please try again.");
+                set({ errorMessage: "Registration failed. Please try again." }); // Pesan default jika tidak ada pesan error dari response
             }
         }
     },
-
     login: async(credentials, navigate, setError) => {
         try {
             const response = await axios.post(
@@ -40,8 +52,10 @@ const useProductStore = create((set, get) => ({
                 credentials
             );
             const data = response.data;
-            set({ user: data.user });
+            set({ user: data.data.data });
             localStorage.setItem("token", data.data.token);
+
+            console.log("user", data.data.data)
             navigate("/home");
         } catch (error) {
             console.error("Login error:", error);
@@ -76,6 +90,25 @@ const useProductStore = create((set, get) => ({
                 },
             });
             set({ productItems: response.data.data });
+            console.log("Fetched products successfully:", response.data.data);
+        } catch (error) {
+            console.error("Fetch products error:", error);
+        }
+    },
+    fetchProductDescs: async() => {
+        try {
+            const token = get().token;
+            if (!token) {
+                console.error("Token not found. Unable to fetch products.");
+                return;
+            }
+
+            const response = await axios.get("http://localhost:8000/api/products/desc", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            set({ productDesc: response.data.data });
             console.log("Fetched products successfully:", response.data.data);
         } catch (error) {
             console.error("Fetch products error:", error);
@@ -118,7 +151,10 @@ const useProductStore = create((set, get) => ({
 
         try {
             const response = await axios.post(
-                "http://localhost:8000/api/carts", { product_id: item.id, quantity: 1 }, {
+                "http://localhost:8000/api/carts", {
+                    product_id: item.id,
+                    quantity: 1
+                }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -129,7 +165,8 @@ const useProductStore = create((set, get) => ({
 
             set((state) => ({
                 productItems: state.productItems.map((p) =>
-                    p.id === item.id ? {...p, stock: p.stock - 1 } : p
+                    p.id === item.id ? {...p, stock: p.stock - 1 } : p //mengurangi langsung stock
+                    // p.id === item.id ? {...p } : p
                 ),
             }));
             console.log("Updated cart items:", updatedCartItems);
@@ -207,6 +244,7 @@ const useProductStore = create((set, get) => ({
 
             console.log("Incremented cart item quantity:", updatedCartItem);
         } catch (error) {
+            alert("Cek kembali ketersediaan produk")
             console.error("Update cart item quantity error:", error);
         }
     },
@@ -226,6 +264,7 @@ const useProductStore = create((set, get) => ({
 
         if (cartItem.quantity <= 1) {
             console.error("Quantity must be greater than 0.");
+            alert("Quantity must be greater than 0.")
             return;
         }
 
@@ -255,11 +294,13 @@ const useProductStore = create((set, get) => ({
 
             console.log("Decremented cart item quantity:", updatedCartItem);
         } catch (error) {
+            alert("Cek kembali ketersediaan produk")
             console.error("Update cart item quantity error:", error);
         }
     },
 
-    createOrder: async(orderData, navigate, setError) => {
+
+    createOrder: async(orderData, setError) => {
         const token = get().token;
         if (!token) {
             console.error("Token not found. Unable to create order.");
@@ -268,8 +309,9 @@ const useProductStore = create((set, get) => ({
 
         try {
             const response = await axios.post(
-                "http://localhost:8000/api/orders",
-                orderData, {
+                "http://localhost:8000/api/orders", {
+                    ...orderData,
+                }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -277,21 +319,16 @@ const useProductStore = create((set, get) => ({
             );
             const newOrder = response.data;
 
-            // Update orders in the state
             set((state) => ({
                 orders: [...state.orders, newOrder],
                 cartItems: [], // Clear the cart after successful order creation
             }));
 
-            // Redirect to order success page
-            navigate("/shop");
+            // navigate('/shop'); // Navigate to order success page
+
         } catch (error) {
             console.error("Create order error:", error);
-            if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-            ) {
+            if (error.response && error.response.data && error.response.data.message) {
                 setError(error.response.data.message);
             } else {
                 setError("Order creation failed. Please try again.");
@@ -318,6 +355,27 @@ const useProductStore = create((set, get) => ({
         }
     },
 
+    fetchOrderById: async(orderId) => {
+        const token = get().token;
+        if (!token) {
+            console.error("Token not found. Unable to fetch order.");
+            return;
+        }
+
+        try {
+            const response = await axios.get(`http://localhost:8000/api/orders/${orderId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data; // Pastikan data dikembalikan dengan benar
+        } catch (error) {
+            console.error("Fetch order error:", error);
+            throw error; // Pastikan error dilemparkan untuk ditangani di komponen
+        }
+    },
+
+
     createShipping: async(shippingData, navigate, setError) => {
         const token = get().token;
         if (!token) {
@@ -336,18 +394,17 @@ const useProductStore = create((set, get) => ({
             );
             const newShipping = response.data.data;
 
-            // Update shippings in the state
             set((state) => ({
                 shippings: [...state.shippings, newShipping],
             }));
-            navigate("/order");
+
+            // Optional: navigate to a success page
+            if (navigate) {
+                navigate("/shop");
+            }
         } catch (error) {
             console.error("Create shipping error:", error);
-            if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-            ) {
+            if (error.response && error.response.data && error.response.data.message) {
                 setError(error.response.data.message);
             } else {
                 setError("Shipping creation failed. Please try again.");
@@ -355,45 +412,90 @@ const useProductStore = create((set, get) => ({
         }
     },
 
-    updateShipping: async(shippingId, shippingData, navigate, setError) => {
+    fetchShippingByOrderId: async(orderId, setError) => {
+        const token = get().token;
+        if (!token) {
+            console.error("Token not found. Unable to fetch shipping.");
+            setError("Token not found. Unable to fetch shipping.");
+            return null;
+        }
+
+        try {
+            const response = await axios.get(
+                `http://localhost:8000/api/shippings/${orderId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.data && response.data.data) {
+                const shipping = response.data.data;
+                // console.log("Fetched shipping data:", shipping); // Tambahkan log ini
+                set((state) => ({
+                    shippings: [...state.shippings, shipping],
+                }));
+                return shipping;
+            } else {
+                setError("Shipping not found for this order.");
+                return null;
+            }
+        } catch (error) {
+            console.error("Fetch shipping error:", error);
+            if (error.response && error.response.status === 404) {
+                setError("Shipping not found for this order.");
+            } else if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            } else {
+                setError("Shipping fetch failed. Please try again.");
+            }
+            return null;
+        }
+    },
+
+    updateShipping: async(orderId, shippingData, setError) => {
         const token = get().token;
         if (!token) {
             console.error("Token not found. Unable to update shipping.");
+            setError("Token not found. Unable to update shipping.");
             return;
         }
 
         try {
             const response = await axios.put(
-                `http://localhost:8000/api/shippings/${shippingId}`,
+                `http://localhost:8000/api/shippings/${orderId}`,
                 shippingData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 }
             );
-            const updatedShipping = response.data.data;
 
-            // Update shippings in the state
-            set((state) => ({
-                shippings: state.shippings.map((shipping) =>
-                    shipping.id === shippingId ? updatedShipping : shipping
-                ),
-            }));
-
-            navigate("/order");
+            if (response.data && response.data.data) {
+                const updatedShipping = response.data.data;
+                set((state) => ({
+                    shippings: state.shippings.map((shipping) =>
+                        shipping.id === orderId ? updatedShipping : shipping
+                    ),
+                }));
+            } else {
+                setError("Shipping update failed.");
+            }
         } catch (error) {
             console.error("Update shipping error:", error);
-            if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-            ) {
+            if (error.response && error.response.status === 404) {
+                setError("Shipping not found for this order.");
+            } else if (error.response && error.response.data && error.response.data.message) {
                 setError(error.response.data.message);
             } else {
                 setError("Shipping update failed. Please try again.");
             }
         }
     },
+
+    setOrders: (orders) => set({ orders }),
+
+
     cancelOrder: async(orderId, setError) => {
         const token = get().token;
         if (!token) {

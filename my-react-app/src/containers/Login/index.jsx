@@ -12,13 +12,6 @@ const Login = () => {
   const setToken = useAuthStore((state) => state.setToken);
   const navigate = useNavigate();
 
-//   const handleLogin = async (e) => {
-//     e.preventDefault();    
-//     setError(""); // Reset error state before login attempt
-//     const token = localStorage.getItem("token");
-//     setToken(token);
-//     await login({ email, password }, navigate, setError);
-//   };
 const handleLogin = async (e) => {
     e.preventDefault();
     setError(""); // Reset error state before login attempt

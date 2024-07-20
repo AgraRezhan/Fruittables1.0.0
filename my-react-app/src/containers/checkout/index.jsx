@@ -13,10 +13,10 @@ const Index = () => {
   const [postcode, setPostcode] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
+  const [img_payment, setImg_payment] = useState("");
   const [note, setNote] = useState("");
   const [payment_method, setPayment_method] = useState("");
   const [error, setError] = useState("");
-  const [total, setTotal] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { cartItems, fetchCarts, createOrder } = useProductStore();
@@ -25,7 +25,6 @@ const Index = () => {
     fetchCarts();
   }, [fetchCarts]);
 
-  const createShipping = useProductStore((state) => state.createShipping);
   const navigate = useNavigate();
 
   const [shippingOptions, setShippingOptions] = useState({
@@ -45,49 +44,6 @@ const Index = () => {
   const handlePaymentChange = (e) => {
     setPayment_method(e.target.value);
   };
-  const handleCreate = async (e) => {
-    e.preventDefault();
-
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
-    const shippingData = {
-      first_name,
-      last_name,
-      company_name,
-      address,
-      city,
-      postcode,
-      mobile,
-      email,
-      note,
-      payment_method,
-      total: totalShipping,
-    };
-
-    const orderData = {
-      items: cartItems,
-      total: totalShipping,
-      shipping: { ...shippingOptions, address, city, postcode },
-      payment_method,
-    };
-
-    try {
-      // Kirim data order setelah data shipping berhasil terkirim
-      await createOrder(orderData, navigate, setError);
-      console.log("Order data sent successfully:", orderData);
-      // Kirim data shipping
-      await createShipping(shippingData, navigate, setError);
-      console.log("Shipping data sent successfully:", shippingData);
-
-      navigate("/shop");
-    } catch (error) {
-      console.error("Error sending data:", error);
-      setError("Failed to create order");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const flatRate = 15000;
   const localPickup = 25000;
@@ -103,6 +59,51 @@ const Index = () => {
     (shippingOptions.localPickup ? localPickup : 0);
   const totalShipping = subtotal + totalShippingCost;
 
+  // console.log("total keseluruhan", totalShipping)
+  const handleCreate = async (e) => {
+    e.preventDefault();
+
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    const orderData = {
+      items: cartItems,
+      total: totalShipping,
+      payment_method: payment_method,
+      shipping: {
+        company_name,
+        address,
+        city,
+        postcode,
+        mobile,
+        img_payment,
+        note,
+        payment_method,
+        total: totalShipping,
+      },
+    };
+
+    try {
+      for (let i = 0; i < cartItems.length; i++) {
+        if (cartItems[i].product.stock < cartItems[i].quantity) {
+          alert(`Stok produk ${cartItems[i].product.title} tidak mencukupi!`);
+          return; // Hentikan proses jika stok tidak mencukupi
+        }
+      }
+      await createOrder(orderData, navigate, setError);
+      // console.log("Order and shipping created successfully: ", { orderData });
+
+      navigate("/shop");
+    } catch (error) {
+      console.error("Error sending data:", error);
+      setError("Failed to create order");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  
+
   return (
     <>
       <Navbar />
@@ -113,36 +114,6 @@ const Index = () => {
           <form onSubmit={handleCreate}>
             <div className="row g-5">
               <div className="col-md-12 col-lg-6">
-                <div className="row">
-                  <div className="col-md-12 col-lg-6">
-                    <div className="form-item w-100">
-                      <label className="form-label my-3">
-                        First Name<sup>*</sup>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={first_name}
-                        onChange={(e) => setFirst_name(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="col-md-12 col-lg-6">
-                    <div className="form-item w-100">
-                      <label className="form-label my-3">
-                        Last Name<sup>*</sup>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={last_name}
-                        onChange={(e) => setLast_name(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
                 <div className="form-item">
                   <label className="form-label my-3">
                     Company Name<sup>*</sup>
@@ -185,7 +156,7 @@ const Index = () => {
                     Postcode/Zip<sup>*</sup>
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     className="form-control"
                     value={postcode}
                     onChange={(e) => setPostcode(e.target.value)}
@@ -204,15 +175,16 @@ const Index = () => {
                     required
                   />
                 </div>
+                
                 <div className="form-item">
                   <label className="form-label my-3">
-                    Email Address<sup>*</sup>
+                    Image of payment proof URL<sup>*</sup>
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     className="form-control"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={img_payment}
+                    onChange={(e) => setImg_payment(e.target.value)}
                     required
                   />
                 </div>
@@ -369,45 +341,42 @@ const Index = () => {
                     your Order ID as the payment reference. Your order will not
                     be shipped until the funds have cleared in our account.
                   </p>
-                </div>
-
-                <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                  <div className="col-12">
-                    <div className="form-check text-start my-3">
-                      <input
-                        type="radio"
-                        className="form-check-input bg-primary border-0"
-                        id="Payments-1"
-                        name="payment_method"
-                        value="Check Payments"
-                        checked={payment_method === "Check Payments"}
-                        onChange={handlePaymentChange}
-                      />
-                      <label className="form-check-label" htmlFor="Payments-1">
-                        Check Payments
-                      </label>
+                  <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
+                    <div className="col-12">
+                      <div className="form-check text-start my-3">
+                        <input
+                          type="radio"
+                          className="form-check-input bg-primary border-0"
+                          id="Payments-1"
+                          name="payment_method"
+                          value="Check Payments"
+                          checked={payment_method === "Check Payments"}
+                          onChange={handlePaymentChange}
+                        />
+                        <label className="form-check-label" htmlFor="Payments-1">
+                          Check Payments
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
-                  <div className="col-12">
-                    <div className="form-check text-start my-3">
-                      <input
-                        type="radio"
-                        className="form-check-input bg-primary border-0"
-                        id="Delivery-1"
-                        name="payment_method"
-                        value="Cash On Delivery"
-                        checked={payment_method === "Cash On Delivery"}
-                        onChange={handlePaymentChange}
-                      />
-                      <label className="form-check-label" htmlFor="Delivery-1">
-                        Cash On Delivery
-                      </label>
+                  <div className="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
+                    <div className="col-12">
+                      <div className="form-check text-start my-3">
+                        <input
+                          type="radio"
+                          className="form-check-input bg-primary border-0"
+                          id="Delivery-1"
+                          name="payment_method"
+                          value="Cash On Delivery"
+                          checked={payment_method === "Cash On Delivery"}
+                          onChange={handlePaymentChange}
+                        />
+                        <label className="form-check-label" htmlFor="Delivery-1">
+                          Cash On Delivery
+                        </label>
+                      </div>
                     </div>
                   </div>
-
                   <hr />
                   <div className="form-check">
                     <input
@@ -428,7 +397,11 @@ const Index = () => {
                     className="btn btn-primary w-100 py-3 mt-4"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Placing Order..." : "Place Order"}
+                    {isSubmitting ? 
+                    <div class="spinner-border text-success" role="status">
+                    <span class="visually-hidden">Placing Order...</span>
+                  </div>
+                     : "Place Order"}
                   </button>
                 </div>
               </div>

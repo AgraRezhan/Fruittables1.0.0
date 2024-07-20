@@ -4,9 +4,10 @@ import useProductStore from "../../store/useProductStore";
 import { useEffect } from "react";
 import { Button } from "bootstrap";
 import { useNavigate } from "react-router-dom";
+import "./style.css"
 
-const index = () => {
-  const { productItems, fetchProducts, addCartItem } = useProductStore();
+const Index = () => {
+  const { user, productItems, fetchProducts, addCartItem } = useProductStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,12 +15,17 @@ const index = () => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // console.log("ini products", productItems);
+  console.log("ini user", user);
 
   const handleAddToCart = (product) => {
-    if (product && product.id) {
+    console.log("product", product)
+    if (product.stock <= 0) {
+      alert("produk tidak mencukupi")
+    } else if(product && product.id) {
       addCartItem(product);
-    } else {
+      alert("produk berhasil ditambahkan")
+      // navigate("/cart")
+    }else{
       console.error("Invalid product:", product);
     }
   };
@@ -100,7 +106,7 @@ const index = () => {
                     <div className="row g-4">
                       {productItems &&
                         productItems.map((product) => (
-                          <div className="col-md-6 col-lg-4 col-xl-3 ">
+                          <div className="col-md-6 col-lg-4 col-xl-3" key={product.id}>
                             <div className="rounded position-relative fruite-product border border-secondary">
                               <div className="fruite-img">
                                 <button
@@ -121,13 +127,10 @@ const index = () => {
                               >
                                 Fruits
                               </div>
-                              <div
-                                className="p-4  border-top-0 rounded-bottom"
-                                style={{ marginTop: "auto" }}
-                              >
+                              <div className="p-4 fruite-product-content border-top-0 rounded-bottom">
                                 <h4>{product.title}</h4>
                                 <p>{product.description}</p>
-                                <div className="d-flex justify-content-between flex-lg-wrap">
+                                <div className="fruite-product-footer">
                                   <p className="text-dark fs-5 fw-bold mb-0">
                                     {product.price} / kg
                                   </p>
@@ -140,6 +143,9 @@ const index = () => {
                                     Add to cart
                                   </button>
                                 </div>
+                                <p className="text-dark fs-5 mb-0 text-end">
+                                  Stock : {product.stock}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -199,7 +205,7 @@ const index = () => {
                   />
                   <div className="px-4 rounded-bottom">
                     <div className="service-content bg-secondary text-center p-4 rounded">
-                      <h5 className="text-white">Exotic Vegitable</h5>
+                      <h5 className="text-white">Exotic Vegetable</h5>
                       <h3 className="mb-0">Discount 30$</h3>
                     </div>
                   </div>
@@ -213,4 +219,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;
