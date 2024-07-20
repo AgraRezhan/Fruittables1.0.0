@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('products', {
+        await queryInterface.createTable('shippings', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -12,20 +12,44 @@ module.exports = {
             user_id: {
                 type: Sequelize.INTEGER
             },
-            title: {
-                type: Sequelize.STRING
-            },
-            description: {
-                type: Sequelize.STRING
-            },
-            price: {
-                type: Sequelize.DECIMAL(10, 2)
-            },
-            stock: {
+            order_id: {
                 type: Sequelize.INTEGER
             },
-            img_url: {
+            first_name: {
+                type: Sequelize.STRING
+            },
+            last_name: {
+                type: Sequelize.STRING
+            },
+            company_name: {
+                type: Sequelize.STRING
+            },
+            address: {
+                type: Sequelize.STRING
+            },
+            city: {
+                type: Sequelize.STRING
+            },
+            postcode: {
+                type: Sequelize.INTEGER
+            },
+            mobile: {
+                type: Sequelize.STRING
+            },
+            email: {
+                type: Sequelize.STRING
+            },
+            img_payment: {
                 type: Sequelize.TEXT
+            },
+            note: {
+                type: Sequelize.STRING
+            },
+            payment_method: {
+                type: Sequelize.STRING
+            },
+            total: {
+                type: Sequelize.DECIMAL(10, 2)
             },
             created_at: {
                 allowNull: false,
@@ -40,6 +64,6 @@ module.exports = {
         });
     },
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('products');
+        await queryInterface.dropTable('shippings');
     }
 };

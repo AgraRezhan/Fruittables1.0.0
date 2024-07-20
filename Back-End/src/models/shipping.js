@@ -32,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         postcode: DataTypes.INTEGER,
         mobile: DataTypes.STRING,
         email: DataTypes.STRING,
+        img_payment: DataTypes.TEXT,
         note: DataTypes.STRING,
         payment_method: DataTypes.STRING,
         total: DataTypes.DECIMAL

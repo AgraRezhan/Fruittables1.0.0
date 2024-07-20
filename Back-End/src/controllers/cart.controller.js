@@ -38,7 +38,7 @@ const create = async(req, res, _next) => {
     try {
         const { product_id, quantity } = req.body;
 
-        //melakukan pengecekan terhadap inputan user
+        // melakukan pengecekan terhadap inputan user
         if (!product_id || !quantity) {
             return res.status(400).send({ message: "Permintaan tidak valid" });
         }
@@ -49,17 +49,17 @@ const create = async(req, res, _next) => {
             },
         });
 
-        //melakukan pengecekan produk dari product_id
+        // melakukan pengecekan produk dari product_id
         if (!product) {
             return res.status(404).send({ message: "Produk tidak ditemukan" });
         }
 
-        //melakukan pengecekan pada stok produk
+        // melakukan pengecekan pada stok produk
         if (product.stock < quantity) {
             return res.status(400).send({ message: "Stock tidak mencukupi" });
         }
 
-        //cek apakah item sudah ada di cart
+        // cek apakah item sudah ada di cart
         const existingCartItem = await CartModel.findOne({
             where: {
                 user_id: req.user.id,
@@ -70,10 +70,10 @@ const create = async(req, res, _next) => {
         let cart;
 
         if (existingCartItem) {
-            //jika item sudah ada di cart, update quantity
+            // jika item sudah ada di cart, update quantity
             const newQuantity = existingCartItem.quantity + quantity;
 
-            //cek stok produk sebelum update
+            // cek stok produk sebelum update
             if (product.stock < newQuantity) {
                 return res.status(400).send({ message: "Stock tidak mencukupi untuk quantity yang diminta" });
             }
@@ -82,7 +82,7 @@ const create = async(req, res, _next) => {
 
             cart = existingCartItem;
         } else {
-            //jika item belum ada di cart, tambahkan item baru ke cart
+            // jika item belum ada di cart, tambahkan item baru ke cart
             cart = await CartModel.create({
                 user_id: req.user.id,
                 product_id,
@@ -90,20 +90,12 @@ const create = async(req, res, _next) => {
             });
         }
 
-        //update stok produk
-        await product.update({
-            stock: product.stock - quantity,
-        });
-
-        return res.send({
-            message: "Cart updated successfully",
-            data: cart,
-        });
     } catch (error) {
         console.error("Error:", error);
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+
 
 /**
  * @param {import("express").Request} req
@@ -126,20 +118,6 @@ const remove = async(req, res, _next) => {
             return res.status(404).send({ message: "Cart item not found" });
         }
 
-        //mengembalikan stok produk sebelum menghapus item dari cart
-        const product = await ProductModel.findOne({
-            where: {
-                id: cartItem.product_id,
-            },
-        });
-
-        if (product) {
-            await product.update({
-                stock: product.stock + cartItem.quantity,
-            });
-        }
-
-        //melakukan penghapusan data cart
         await CartModel.destroy({
             where: {
                 id,
@@ -200,9 +178,9 @@ const update = async(req, res, _next) => {
         await cartItem.update({ quantity });
 
         //update stok produk
-        await product.update({
-            stock: product.stock - stockDifference,
-        });
+        // await product.update({
+        //     stock: product.stock - stockDifference,
+        // });
 
         return res.send({
             message: "Cart item updated successfully",

@@ -60,6 +60,8 @@ const login = async(req, res, next) => {
 
         const data = {
             id: user.id,
+            first_name: user.first_name,
+            last_name: user.last_name,
             email: user.email,
             address: user.address,
             role: user.role
@@ -69,6 +71,7 @@ const login = async(req, res, next) => {
         return res.send({
             message: "Login successful",
             data: {
+                data,
                 token: token,
             },
         });

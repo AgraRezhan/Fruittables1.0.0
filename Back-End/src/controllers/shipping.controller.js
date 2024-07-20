@@ -1,4 +1,4 @@
-const { shipping: ShippingModel, user: UserModel, order: OrderModel } = require("../models");
+const { shipping: ShippingModel, user: UserModel, order: OrderModel, product: ProductModel, order_detail: OrderDetailModel, } = require("../models");
 
 /**
  * @param {import("express").Request} req
@@ -12,14 +12,26 @@ const index = async(req, res, _next) => {
         let shippings;
 
         if (currentUser.role === "customer") {
-            // Jika user adalah customer, tampilkan semua produk
+            // Jika user adalah customer, tampilkan semua produk terkait dengan pengiriman
             shippings = await ShippingModel.findAll({
+                where: {
+                    user_id: currentUser.id,
+                },
                 include: [{
                     model: UserModel,
                     as: "user",
                     include: [{
                         model: OrderModel,
                         as: "order",
+                        include: [{
+                            model: OrderDetailModel,
+                            as: "order_detail",
+                            include: [{
+                                model: ProductModel,
+                                as: "product",
+
+                            }, ],
+                        }, ],
                     }, ],
                 }, ],
             });
@@ -35,6 +47,10 @@ const index = async(req, res, _next) => {
                     include: [{
                         model: OrderModel,
                         as: "order",
+                        include: [{
+                            model: ProductModel,
+                            as: "product",
+                        }, ],
                     }, ],
                 }, ],
             });
@@ -58,68 +74,44 @@ const index = async(req, res, _next) => {
  * @param {import("express").Response} res
  * @param {import("express").NextFunction} _next
  */
-
-
-const create = async(req, res, _next) => {
+const getShippingByOrderId = async(req, res, _next) => {
     try {
-        const currentUser = req.user;
-        const {
-            first_name,
-            last_name,
-            company_name,
-            address,
-            city,
-            postcode,
-            mobile,
-            email,
-            note,
-            payment_method,
-            total,
-        } = req.body;
+        const { orderId } = req.params;
 
         // Validasi input
-        if (!first_name ||
-            !last_name ||
-            !address ||
-            !city ||
-            !postcode ||
-            !mobile ||
-            !email ||
-            !payment_method ||
-            !total
-        ) {
-            return res.status(400).send({ message: "Permintaan tidak valid, pastikan semua data diisi" });
+        if (!orderId) {
+            return res.status(400).send({ message: "Order ID tidak ditemukan" });
         }
 
-        // Dapatkan atau buat order terlebih dahulu
-        const newOrder = await OrderModel.create({
-            user_id: currentUser.id,
-            total,
-            // Tambahkan atribut lain yang diperlukan untuk Order
+        // Cari shipping berdasarkan orderId
+        const shipping = await ShippingModel.findOne({
+            where: {
+                order_id: orderId,
+            },
+            include: [{
+                model: UserModel,
+                as: "user",
+            }, {
+                model: OrderModel,
+                as: "order",
+                include: [{
+                    model: OrderDetailModel,
+                    as: "order_detail",
+                    include: [{
+                        model: ProductModel,
+                        as: "product",
+                    }],
+                }],
+            }],
         });
 
-        const order_id = newOrder.id;
-
-        // Buat shipping baru
-        const newShipping = await ShippingModel.create({
-            user_id: currentUser.id,
-            order_id,
-            first_name,
-            last_name,
-            company_name,
-            address,
-            city,
-            postcode,
-            mobile,
-            email,
-            note,
-            payment_method,
-            total,
-        });
+        if (!shipping) {
+            return res.status(404).send({ message: "Shipping tidak ditemukan" });
+        }
 
         return res.send({
-            message: "Shipping created successfully",
-            data: newShipping,
+            message: "Success",
+            data: shipping,
         });
     } catch (error) {
         console.error("Error:", error);
@@ -127,10 +119,18 @@ const create = async(req, res, _next) => {
     }
 };
 
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} _next
+ */
+
+
 const update = async(req, res, _next) => {
     try {
         const currentUser = req.user;
-        const { shippingId } = req.params;
+        const { orderId } = req.params;
         const {
             first_name,
             last_name,
@@ -146,30 +146,38 @@ const update = async(req, res, _next) => {
         } = req.body;
 
         // Validasi input
-        if (!shippingId) {
-            return res.status(400).send({ message: "Shipping ID tidak ditemukan" });
+        if (!orderId) {
+            return res.status(400).send({ message: "Order ID tidak ditemukan" });
         }
 
-        // Pastikan shipping milik user yang sedang login
-        const shipping = await ShippingModel.findOne({
+        // Temukan order dan pastikan milik user yang sedang login
+        const order = await OrderModel.findOne({
             where: {
-                id: shippingId,
+                id: orderId,
                 user_id: currentUser.id,
             },
         });
 
+        if (!order) {
+            return res.status(404).send({ message: "Order tidak ditemukan atau Anda tidak memiliki izin untuk memperbaruinya" });
+        }
+
+        // Temukan shipping terkait dengan order
+        const shipping = await ShippingModel.findOne({
+            where: {
+                order_id: orderId,
+            },
+        });
+
         if (!shipping) {
-            return res.status(404).send({ message: "Shipping tidak ditemukan atau Anda tidak memiliki izin untuk memperbaruinya" });
+            return res.status(404).send({ message: "Shipping tidak ditemukan untuk order ini" });
         }
 
         // Hitung total dari cartItems jika diberikan
-        let total;
+        let total = shipping.total;
         if (cartItems) {
             total = cartItems.reduce((acc, item) => acc + item.quantity * item.product.price, 0);
         }
-
-        // Dapatkan order_id dari shipping yang ada
-        const order_id = shipping.order_id;
 
         // Update shipping
         const updatedShipping = await shipping.update({
@@ -183,7 +191,7 @@ const update = async(req, res, _next) => {
             email: email || shipping.email,
             note: note || shipping.note,
             payment_method: payment_method || shipping.payment_method,
-            total: total || shipping.total,
+            total: total,
         });
 
         return res.send({
@@ -198,4 +206,5 @@ const update = async(req, res, _next) => {
 
 
 
-module.exports = { index, create, update };
+
+module.exports = { index, getShippingByOrderId, update };

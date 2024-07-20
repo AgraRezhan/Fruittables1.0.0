@@ -1,4 +1,4 @@
-const { order: OrderModel, product: ProductModel, order_detail: OrderDetailModel } = require("../models");
+const { order: OrderModel, product: ProductModel, order_detail: OrderDetailModel, shipping: ShippingModel } = require("../models");
 
 /**
  * @param {import("express").Request} req
@@ -63,27 +63,22 @@ const index = async(req, res, next) => {
  * @param {import("express").NextFunction} _next
  */
 
-
 const create = async(req, res, next) => {
-    const { items } = req.body;
+    const { items, shipping } = req.body;
     const currentUser = req.user;
 
-    // Ambil semua product_id dari orderan
     const idOrder = items.map((item) => item.product_id);
 
-    // Cek jika tidak ada idOrder yang diberikan
     if (idOrder.length === 0) {
         return res.status(400).send({ message: "Data tidak ditemukan" });
     }
 
-    // Cari produk berdasarkan product_id dari orderan
     const products = await ProductModel.findAll({
         where: {
             id: idOrder,
         },
     });
 
-    // Jika jumlah produk yang ditemukan tidak sama dengan jumlah orderan, berarti ada product_id yang tidak valid
     if (products.length !== idOrder.length) {
         return res.status(400).send({ message: "Satu atau lebih produk tidak ditemukan" });
     }
@@ -96,12 +91,8 @@ const create = async(req, res, next) => {
 
     let totalPrice = 0;
 
-    // Melakukan perhitungan terhadap subtotal order_detail
     const orderDetails = items.map((item) => {
         const product = products.find((b) => b.id === item.product_id);
-
-        console.log("products", product);
-
         const subtotal = product.price * item.quantity;
         totalPrice += subtotal;
 
@@ -116,14 +107,21 @@ const create = async(req, res, next) => {
 
     await OrderDetailModel.bulkCreate(orderDetails);
 
-    // Kurangi stok produk
-    for (const item of items) {
-        const product = products.find((b) => b.id === item.product_id);
-        product.stock -= item.quantity;
-        await product.save();
+    try {
+        for (const item of items) {
+            const product = products.find((b) => b.id === item.product_id);
+            if (product) {
+                product.stock -= item.quantity;
+                product.sold += item.quantity;
+                await product.save();
+                console.log(`Updated product ${product.id}: sold=${product.sold}, stock=${product.stock}`);
+            }
+        }
+    } catch (error) {
+        console.error("Error updating product:", error);
+        return res.status(500).send({ message: "Internal server error" });
     }
 
-    // Melakukan update terhadap status dan total harga pada tabel order
     await OrderModel.update({
         total: totalPrice,
         status: "pending",
@@ -133,7 +131,25 @@ const create = async(req, res, next) => {
         },
     });
 
-    // Mengembalikan hasil jika proses create order berhasil
+    const newShipping = await ShippingModel.create({
+        user_id: currentUser.id,
+        order_id: newOrder.id,
+        first_name: currentUser.first_name,
+        last_name: currentUser.last_name,
+        company_name: shipping.company_name,
+        address: shipping.address,
+        city: shipping.city,
+        postcode: shipping.postcode,
+        mobile: shipping.mobile,
+        email: currentUser.email,
+        img_payment: shipping.img_payment,
+        note: shipping.note,
+        payment_method: shipping.payment_method,
+        total: shipping.total,
+    });
+
+    console.log("Shipping details:", newShipping);
+
     return res.send({
         message: "Success",
         data: {
@@ -145,9 +161,88 @@ const create = async(req, res, next) => {
                 price: parseFloat(od.price),
                 subtotal: parseFloat(od.subtotal),
             })),
+            shipping: newShipping,
         },
     });
 };
+
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
+const getOrderById = async(req, res, next) => {
+    try {
+        const { orderId } = req.params;
+
+        // Temukan order berdasarkan orderId
+        const order = await OrderModel.findByPk(orderId, {
+            include: [{
+                    model: OrderDetailModel,
+                    as: "order_detail",
+                    include: [{
+                        model: ProductModel,
+                        as: "product",
+                    }],
+                },
+                {
+                    model: ShippingModel,
+                    as: "shipping",
+                }
+            ],
+        });
+
+        // Jika order tidak ditemukan
+        if (!order) {
+            return res.status(404).send({ message: "Order not found" });
+        }
+
+        // Format data order untuk dikembalikan
+        const totalQuantity = order.order_detail.reduce((acc, detail) => acc + detail.quantity, 0);
+
+        const formattedOrder = {
+            id: order.id,
+            order_date: order.order_date,
+            address: order.address,
+            status: order.status,
+            quantity: totalQuantity,
+            total: parseFloat(order.total),
+            created_at: order.created_at,
+            items: order.order_detail.map((detail) => ({
+                product_id: detail.product.id,
+                title: detail.product.title,
+                description: detail.product.description,
+                img_url: detail.product.img_url,
+                price: parseFloat(detail.product.price),
+                stock: detail.product.stock,
+                quantity: detail.quantity,
+            })),
+            shipping: {
+                first_name: order.shipping.first_name,
+                last_name: order.shipping.last_name,
+                company_name: order.shipping.company_name,
+                address: order.shipping.address,
+                city: order.shipping.city,
+                postcode: order.shipping.postcode,
+                mobile: order.shipping.mobile,
+                email: order.shipping.email,
+                img_payment: order.shipping.img_payment,
+                note: order.shipping.note,
+                payment_method: order.shipping.payment_method,
+                total: order.shipping.total,
+            }
+        };
+
+        return res.send({
+            message: "Success",
+            data: formattedOrder,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 
 const cancelOrder = async(req, res, next) => {
@@ -195,4 +290,4 @@ const cancelOrder = async(req, res, next) => {
 };
 
 
-module.exports = { index, create, cancelOrder };
+module.exports = { index, create, getOrderById, cancelOrder };

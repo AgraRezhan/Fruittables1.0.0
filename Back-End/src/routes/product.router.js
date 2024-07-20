@@ -7,10 +7,11 @@ const multer = require("multer");
 const upload = multer({ storage: storage });
 
 const { validateToken } = require("../middlewares/auth")
-const { index, show, create, remove, update } = require("../controllers/product.controller")
+const { index, showDesc, show, create, remove, update } = require("../controllers/product.controller")
 
 // /api/babs
 router.get("/", validateToken, index);
+router.get("/desc", validateToken, showDesc);
 router.get("/:id", validateToken, show);
 router.post("/", validateToken, upload.single("img_url"), create);
 router.delete("/:productId", validateToken, remove);

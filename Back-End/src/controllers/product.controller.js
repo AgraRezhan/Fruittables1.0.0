@@ -42,6 +42,58 @@ const index = async(req, res, _next) => {
  * @param {import("express").NextFunction} _next
  */
 
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} _next
+ */
+const showDesc = async(req, res, _next) => {
+    try {
+        const currentUser = req.user;
+        let products;
+
+        // Menentukan limit produk yang ditampilkan
+        const limit = 10;
+
+        if (currentUser.role == "customer") {
+            // Jika user adalah customer, tampilkan 10 produk teratas berdasarkan sold
+            products = await ProductModel.findAll({
+                order: [
+                    ['sold', 'DESC']
+                ], // Urutkan berdasarkan sold secara menurun
+                limit: limit, // Batasi hasil hanya 10 produk
+            });
+        } else if (currentUser.role == 'seller') {
+            // Jika user adalah seller, tampilkan 10 produk teratas berdasarkan sold untuk seller tersebut
+            products = await ProductModel.findAll({
+                where: {
+                    user_id: currentUser.id,
+                },
+                order: [
+                    ['sold', 'DESC']
+                ], // Urutkan berdasarkan sold secara menurun
+                limit: limit, // Batasi hasil hanya 10 produk
+            });
+        } else {
+            return res.status(403).send({ message: "role tidak valid" });
+        }
+
+        return res.send({
+            message: "Success",
+            data: products,
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} _next
+ */
+
 const show = async(req, res, next) => {
     try {
         const { id } = req.params;
@@ -221,4 +273,4 @@ const remove = async(req, res, _next) => {
 };
 
 
-module.exports = { index, show, create, remove, update };
+module.exports = { index, showDesc, show, create, remove, update };
