@@ -10,11 +10,17 @@ import { Link, useNavigate } from "react-router-dom";
 import useProductStore from "../../store/useProductStore";
 import { useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom"
+import { generateUrl } from '../../utils';
+
+
 const index = () => {
 
   const[show, setShow] = useState(false)
   const { fetchCarts, cartItems, logout } = useProductStore();
   const navigate = useNavigate()
+
+  const token = localStorage.getItem("token");
+  const url = generateUrl();
 
   useEffect(() => {
     fetchCarts()
@@ -22,6 +28,7 @@ const index = () => {
 
   const handleLogout = () => {
     logout();
+    alert("anda berhasil keluar")
     navigate("/")
   };
 
@@ -83,12 +90,15 @@ const index = () => {
             id="navbarCollapse"
           >
             <div className="navbar-nav mx-auto">
-              <Link to={"/home"} className="nav-item nav-link active">
+              <Link to={url} className="nav-item nav-link active">
                 Home
               </Link>
-              <Link to={"/shop"} className="nav-item nav-link">
+              {
+                token && <Link to={"/shop"} className="nav-item nav-link">
                 Shop
               </Link>
+              }
+              
               <div className="nav-item dropdown">
                 <a
                   href="#"
@@ -98,9 +108,12 @@ const index = () => {
                   Pages
                 </a>
                 <div className="dropdown-menu m-0 bg-secondary rounded-0">
-                  <Link to={"/cart"} className="dropdown-item">
+                  {
+                    token && <Link to={"/cart"} className="dropdown-item">
                     Cart
                   </Link>
+                  }
+                  
                   <a href="#testimonial" className="dropdown-item">
                     Testimonial
                   </a>
@@ -126,17 +139,19 @@ const index = () => {
               >
                 <i className="fas fa-search primary-color"></i>
               </button>
-             
+             {
+              token && <Link to="/cart" className="position-relative me-4 my-auto">
+              <i className="fa fa-shopping-bag fa-2x primary-color"></i>
+              <span
+                className="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+                style={{ top: -5, left: 15, height: 20, minWidth: 20 }}
+              >
+                {cartItems.length}
+              </span>
+            </Link>
+             }
               
-              <Link to="/cart" className="position-relative me-4 my-auto">
-                <i className="fa fa-shopping-bag fa-2x primary-color"></i>
-                <span
-                  className="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                  style={{ top: -5, left: 15, height: 20, minWidth: 20 }}
-                >
-                  {cartItems.length}
-                </span>
-              </Link>
+              
               <a href="#" className="my-auto">
                 <i className="fas fa-user fa-2x primary-color"></i>
               </a>
@@ -147,9 +162,13 @@ const index = () => {
                   data-bs-toggle="dropdown"
                 ></a>
                 <div className="dropdown-menu m-0 bg-secondary rounded-0">
-                  <button 
-                  onClick={handleLogout}
-                  className="w-100 border-success">Logout</button>
+                  {
+                    !token ? <Link to="/login" className="dropdown-item">
+                    Login
+                  </Link> : <Link onClick={handleLogout} className="dropdown-item">
+                    Logout
+                  </Link>
+                  }
                 </div>
               </div>
             </div>

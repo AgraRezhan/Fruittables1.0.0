@@ -9,8 +9,21 @@ import "owl.carousel/dist/assets/owl.carousel.css";
 import "owl.carousel";
 import "owl.carousel/dist/assets/owl.carousel.css";
 import "owl.carousel/dist/assets/owl.theme.default.css";
+import { Link, useNavigate } from "react-router-dom";
 
 const index = () => {
+
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  const handleClick = (() =>{
+    if(!token){
+      alert("Anda belum login, silahkan login terlebih dahulu !!")
+    }else{
+      window.location.reload()
+    }
+  })
+
   return (
     <>
       {/* <!-- Vesitable Shop Start--> */}
@@ -40,13 +53,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$4.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -72,13 +85,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$4.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -104,13 +117,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -136,13 +149,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -168,13 +181,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -200,13 +213,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -232,13 +245,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -264,13 +277,13 @@ const index = () => {
                 </p>
                 <div className="d-flex justify-content-between flex-lg-wrap">
                   <p className="text-dark fs-5 fw-bold mb-0">$7.99 / kg</p>
-                  <a
-                    href="#"
+                  <Link
+                    onClick = {handleClick}
                     className="btn border border-secondary rounded-pill px-3 text-primary"
                   >
                     <i className="fa fa-shopping-bag me-2 text-primary"></i> Add
                     to cart
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -293,12 +306,12 @@ const index = () => {
                   The generated Lorem Ipsum is therefore always free from
                   repetition injected humour, or non-characteristic words etc.
                 </p>
-                <a
-                  href="#"
+                <Link
+                  onClick={handleClick}
                   className="banner-btn btn border-2 border-white rounded-pill text-dark py-3 px-5"
                 >
                   BUY
-                </a>
+                </Link>
               </div>
             </div>
             <div className="col-lg-6">

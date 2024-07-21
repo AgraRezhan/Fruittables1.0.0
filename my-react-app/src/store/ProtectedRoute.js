@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
 
     useEffect(() => {
         if (!isAuthenticated) {
-            navigate('/'); // Arahkan ke halaman login jika tidak terautentikasi
+            navigate('/login'); // Arahkan ke halaman login jika tidak terautentikasi
         }
     }, [isAuthenticated, navigate]);
 

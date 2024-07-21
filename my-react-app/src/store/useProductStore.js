@@ -31,7 +31,7 @@ const useProductStore = create((set, get) => ({
             {
                 // set({ errorMessage: '' });
                 set({ errorMessage: "Login success" });
-                navigate("/")
+                navigate("/login")
 
             }
 
@@ -56,7 +56,7 @@ const useProductStore = create((set, get) => ({
             localStorage.setItem("token", data.data.token);
 
             console.log("user", data.data.data)
-            navigate("/home");
+            navigate("/");
         } catch (error) {
             console.error("Login error:", error);
             if (
@@ -78,17 +78,19 @@ const useProductStore = create((set, get) => ({
 
     fetchProducts: async() => {
         try {
-            const token = get().token;
-            if (!token) {
-                console.error("Token not found. Unable to fetch products.");
-                return;
-            }
+            // const token = get().token;
+            // if (!token) {
+            //     console.error("Token not found. Unable to fetch products.");
+            //     return;
+            // }
 
-            const response = await axios.get("http://localhost:8000/api/products", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.get("http://localhost:8000/api/products",
+                //     {
+                //     headers: {
+                //         Authorization: `Bearer ${token}`,
+                //     },
+                // }
+            );
             set({ productItems: response.data.data });
             console.log("Fetched products successfully:", response.data.data);
         } catch (error) {
@@ -97,17 +99,19 @@ const useProductStore = create((set, get) => ({
     },
     fetchProductDescs: async() => {
         try {
-            const token = get().token;
-            if (!token) {
-                console.error("Token not found. Unable to fetch products.");
-                return;
-            }
+            // const token = get().token;
+            // if (!token) {
+            //     console.error("Token not found. Unable to fetch products.");
+            //     return;
+            // }
 
-            const response = await axios.get("http://localhost:8000/api/products/desc", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await axios.get("http://localhost:8000/api/products/desc",
+                // {
+                // headers: {
+                //     Authorization: `Bearer ${token}`,
+                // },
+                // }
+            );
             set({ productDesc: response.data.data });
             console.log("Fetched products successfully:", response.data.data);
         } catch (error) {

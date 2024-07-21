@@ -9,6 +9,8 @@ const index = () => {
   const { user, productDesc,  fetchProductDescs, addCartItem } = useProductStore();
   const navigate = useNavigate();
 
+  const token = localStorage.getItem("token")
+
   useEffect(() => {
     // Panggil fungsi  fetchProductDescs untuk mengambil data produk saat komponen di-mount
      fetchProductDescs();
@@ -18,7 +20,10 @@ const index = () => {
 
   const handleAddToCart = (product) => {
     console.log("product", product)
-    if (product.stock <= 0) {
+    if(!token){
+      alert("Anda belum login, silahkan login terlebih dahulu !!")
+      navigate("/login")
+    }else if (product.stock <= 0) {
       alert("produk tidak mencukupi")
     } else if(product && product.id) {
       addCartItem(product);

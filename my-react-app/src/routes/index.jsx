@@ -15,16 +15,14 @@ const Index = () => {
   const router = createBrowserRouter([
     {
       path: '/',
+      element: 
+          <HomePage />
+      
+    },{
+      path: '/login',
       element: <Login />,
     },
-    {
-      path: '/home',
-      element: (
-        <ProtectedRoute>
-          <HomePage />
-        </ProtectedRoute>
-      ),
-    },
+    
     {
       path: '/register',
       element: <Register />,
