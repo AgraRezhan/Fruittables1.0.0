@@ -8,23 +8,23 @@ const { product: ProductModel } = require("../models");
 
 const index = async(req, res, _next) => {
     try {
-        const currentUser = req.user;
+        // const currentUser = req.user;
         let products;
 
 
-        if (currentUser.role == "customer") {
-            // Jika user adalah customer, tampilkan semua produk
-            products = await ProductModel.findAll();
-        } else if (currentUser.role == 'seller') {
-            // Jika user adalah seller, tampilkan produk berdasarkan user_id
-            products = await ProductModel.findAll({
-                where: {
-                    user_id: currentUser.id,
-                },
-            });
-        } else {
-            return res.status(403).send({ message: "role tidak valid" });
-        }
+        // if (currentUser.role == "customer") {
+        //     // Jika user adalah customer, tampilkan semua produk
+        products = await ProductModel.findAll();
+        // } else if (currentUser.role == 'seller') {
+        //     // Jika user adalah seller, tampilkan produk berdasarkan user_id
+        //     products = await ProductModel.findAll({
+        //         where: {
+        //             user_id: currentUser.id,
+        //         },
+        //     });
+        // } else {
+        //     return res.status(403).send({ message: "role tidak valid" });
+        // }
 
         return res.send({
             message: "Success",
@@ -49,34 +49,34 @@ const index = async(req, res, _next) => {
  */
 const showDesc = async(req, res, _next) => {
     try {
-        const currentUser = req.user;
+        // const currentUser = req.user;
         let products;
 
         // Menentukan limit produk yang ditampilkan
         const limit = 10;
 
-        if (currentUser.role == "customer") {
-            // Jika user adalah customer, tampilkan 10 produk teratas berdasarkan sold
-            products = await ProductModel.findAll({
-                order: [
-                    ['sold', 'DESC']
-                ], // Urutkan berdasarkan sold secara menurun
-                limit: limit, // Batasi hasil hanya 10 produk
-            });
-        } else if (currentUser.role == 'seller') {
-            // Jika user adalah seller, tampilkan 10 produk teratas berdasarkan sold untuk seller tersebut
-            products = await ProductModel.findAll({
-                where: {
-                    user_id: currentUser.id,
-                },
-                order: [
-                    ['sold', 'DESC']
-                ], // Urutkan berdasarkan sold secara menurun
-                limit: limit, // Batasi hasil hanya 10 produk
-            });
-        } else {
-            return res.status(403).send({ message: "role tidak valid" });
-        }
+        // if (currentUser.role == "customer") {
+        // Jika user adalah customer, tampilkan 10 produk teratas berdasarkan sold
+        products = await ProductModel.findAll({
+            order: [
+                ['sold', 'DESC']
+            ], // Urutkan berdasarkan sold secara menurun
+            limit: limit, // Batasi hasil hanya 10 produk
+        });
+        // } else if (currentUser.role == 'seller') {
+        //     // Jika user adalah seller, tampilkan 10 produk teratas berdasarkan sold untuk seller tersebut
+        // products = await ProductModel.findAll({
+        //     where: {
+        //         user_id: currentUser.id,
+        //     },
+        //     order: [
+        //         ['sold', 'DESC']
+        //     ], // Urutkan berdasarkan sold secara menurun
+        //     limit: limit, // Batasi hasil hanya 10 produk
+        // });
+        // } else {
+        //     return res.status(403).send({ message: "role tidak valid" });
+        // }
 
         return res.send({
             message: "Success",
