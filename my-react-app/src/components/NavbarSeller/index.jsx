@@ -10,21 +10,17 @@ import { generateUrl } from '../../utils';
 
 const index = () => {
   const [show, setShow] = useState(false);
-  const { fetchCarts, fetchProductSeller, cartItems, logout, user } = useProductStore();
+  const { fetchProductSeller, logout} = useProductStore();
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const url = generateUrl();
 
-  useEffect(() => {
-    fetchCarts();
-  }, [fetchCarts]);
+ 
 
   useEffect(() => {
     fetchProductSeller()
   }, [fetchProductSeller]);
-
-  console.log("navbar user", user)
 
   const handleLogout = () => {
     logout();
@@ -88,35 +84,12 @@ const index = () => {
             id="navbarCollapse"
           >
             <div className="navbar-nav mx-auto">
-              <Link to={url} className="nav-item nav-link active">
+              <Link to="/listproduct" className="nav-item nav-link">
                 Home
               </Link>
-              {token && (
-                <Link to={"/shop"} className="nav-item nav-link">
-                  Shop
-                </Link>
-              )}
-
-              <div className="nav-item dropdown">
-                <a
-                  href="#"
-                  className="nav-link dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                >
-                  Pages
-                </a>
-                <div className="dropdown-menu m-0 bg-secondary rounded-0">
-                  {token && (
-                    <Link to={"/cart"} className="dropdown-item">
-                      Cart
-                    </Link>
-                  )}
-
-                  <a href="#testimonial" className="dropdown-item">
-                    Testimonial
-                  </a>
-                </div>
-              </div>
+              <Link to="/invoice" className="nav-item nav-link">
+                Invoice
+              </Link>
               <a href="#contact" className="nav-item nav-link">
                 Contact
               </a>
@@ -137,17 +110,7 @@ const index = () => {
               >
                 <i className="fas fa-search primary-color"></i>
               </button>
-              {token && (
-                <Link to="/cart" className="position-relative me-4 my-auto">
-                  <i className="fa fa-shopping-bag fa-2x primary-color"></i>
-                  <span
-                    className="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
-                    style={{ top: -5, left: 15, height: 20, minWidth: 20 }}
-                  >
-                    {cartItems.length}
-                  </span>
-                </Link>
-              )}
+             
 
               <a href="#" className="my-auto">
                 <i className="fas fa-user fa-2x primary-color"></i>
@@ -179,4 +142,3 @@ const index = () => {
 };
 
 export default index;
-

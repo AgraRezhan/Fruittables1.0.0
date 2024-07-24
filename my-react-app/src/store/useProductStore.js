@@ -6,6 +6,7 @@ const useProductStore = create((set, get) => ({
     token: localStorage.getItem("token") || null,
     productItems: [],
     productDesc: [],
+    productSeller: [],
     cartItems: [],
     orders: [],
     shippings: [],
@@ -56,7 +57,12 @@ const useProductStore = create((set, get) => ({
             localStorage.setItem("token", data.data.token);
 
             console.log("user", data.data.data)
-            navigate("/");
+            if (data.data.data.role === "customer") {
+                navigate("/");
+            } else {
+                navigate("/listproduct")
+            }
+
         } catch (error) {
             console.error("Login error:", error);
             if (
@@ -118,6 +124,114 @@ const useProductStore = create((set, get) => ({
             console.error("Fetch products error:", error);
         }
     },
+    fetchProductSeller: async() => {
+        try {
+            const token = get().token;
+            if (!token) {
+                console.error("Token not found. Unable to fetch products.");
+                return;
+            }
+
+            const response = await axios.get("http://localhost:8000/api/products/seller", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            set({ productSeller: response.data.data });
+            console.log("Fetched products successfully:", response.data.data);
+        } catch (error) {
+            console.error("Fetch products error:", error);
+        }
+    },
+
+    fetchProductById: async(id) => {
+        try {
+            const token = get().token;
+            if (!token) {
+                console.error("Token not found. Unable to fetch product.");
+                return;
+            }
+
+            const response = await axios.get(`http://localhost:8000/api/products/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data.data;
+        } catch (error) {
+            console.error("Fetch product error:", error);
+        }
+    },
+
+    addProduct: async(productData) => {
+        const token = get().token; // Dapatkan token dari state store
+
+        if (!token) {
+            throw new Error("No token available");
+        }
+
+        try {
+            const response = await axios.post("http://localhost:8000/api/products", productData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            set((state) => ({
+                productItems: [...state.productItems, response.data.data],
+            }));
+            console.log("Product added successfully:", response.data.data);
+        } catch (error) {
+            console.error("Add product error:", error);
+            throw error; // Re-throw the error to handle it in the component
+        }
+    },
+
+    updateProduct: async(id, productData) => {
+        try {
+            const token = get().token;
+            if (!token) {
+                console.error("Token not found. Unable to update product.");
+                return;
+            }
+
+            const response = await axios.put(`http://localhost:8000/api/products/${id}`, productData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data"
+                },
+            });
+            console.log("Product updated successfully:", response.data);
+            // Optionally, refetch the products to update the state
+            get().fetchProducts();
+        } catch (error) {
+            console.error("Update product error:", error);
+        }
+    },
+
+
+    deleteProduct: async(productId) => {
+        try {
+            const token = get().token;
+            if (!token) {
+                console.error("Token not found. Unable to delete product.");
+                return;
+            }
+
+            const response = await axios.delete(`http://localhost:8000/api/products/${productId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log("Product deleted successfully:", response.data);
+
+            // Optionally, refetch the products to update the state
+            get().fetchProducts();
+        } catch (error) {
+            console.error("Delete product error:", error);
+        }
+    },
+
 
     fetchCarts: async() => {
         try {

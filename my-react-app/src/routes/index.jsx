@@ -10,6 +10,10 @@ import Checkout from '../pages/Checkout';
 import OrderDetail from "../pages/OrderDetail";
 import ProtectedRoute from '../store/ProtectedRoute';
 import UpdateBilling from "../pages/Update";
+import ListProduct from "../pages/ListProduct";
+import UpdateProduct from "../pages/UpdateProduct";
+import AddProduct from "../pages/Add";
+import Invoice from "../pages/Invoice";
 
 const Index = () => {
   const router = createBrowserRouter([
@@ -72,6 +76,38 @@ const Index = () => {
       element: (
         <ProtectedRoute>
           <UpdateBilling />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/listproduct',
+      element: (
+        <ProtectedRoute>
+          <ListProduct />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/updateproduct/:id',
+      element: (
+        <ProtectedRoute>
+          <UpdateProduct />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/addproduct',
+      element: (
+        <ProtectedRoute>
+          <AddProduct />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: '/invoice',
+      element: (
+        <ProtectedRoute>
+          <Invoice />
         </ProtectedRoute>
       ),
     },
