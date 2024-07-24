@@ -35,6 +35,31 @@ const index = async(req, res, _next) => {
         return res.status(500).send({ message: "Internal Server Error" });
     }
 };
+const indexSeller = async(req, res, _next) => {
+    try {
+        const currentUser = req.user;
+
+        let products;
+
+        if (currentUser.role == 'seller') {
+            products = await ProductModel.findAll({
+                where: {
+                    user_id: currentUser.id,
+                },
+            });
+        } else {
+            return res.status(403).send({ message: "role tidak valid" });
+        }
+
+        return res.send({
+            message: "Success",
+            data: products,
+        });
+    } catch (error) {
+        console.error("Error:", error);
+        return res.status(500).send({ message: "Internal Server Error" });
+    }
+};
 
 /**
  * @param {import("express").Request} req
@@ -273,4 +298,4 @@ const remove = async(req, res, _next) => {
 };
 
 
-module.exports = { index, showDesc, show, create, remove, update };
+module.exports = { index, indexSeller, showDesc, show, create, remove, update };

@@ -256,32 +256,34 @@ const cancelOrder = async(req, res, next) => {
             }
         });
 
-        //melakukan pengecekan dengan orderan berdasarkan orderId
         if (!order) {
             return res.status(404).send({ message: "Orderan tidak ditemukan" });
         }
 
-        //melakukan pengecekan terhadap status orderan
+        console.log("Status awal order:", order.status);
+
         if (order.status === "cancelled") {
             return res.status(400).send({ message: "Orderan sudah dibatalkan" });
         }
 
         const orderDetails = order.order_detail;
 
-        //melakukan pengembalian jumlah produk yang telah dikurangi dari proses create order
-        orderDetails.forEach(async(detail) => {
+        for (const detail of orderDetails) {
             const product = await ProductModel.findByPk(detail.product_id);
+
+            if (!product) {
+                return res.status(404).send({ message: `Produk dengan ID ${detail.product_id} tidak ditemukan` });
+            }
+
             product.stock += detail.quantity;
             await product.save();
-        });
+        }
 
-        await OrderModel.update({
-            status: "cancelled"
-        }, {
-            where: {
-                id: orderId,
-            },
-        });
+        await OrderModel.update({ status: "cancelled" }, { where: { id: orderId } });
+
+        // Periksa apakah pembaruan berhasil
+        const updatedOrder = await OrderModel.findByPk(orderId);
+        console.log("Status order setelah pembaruan:", updatedOrder.status);
 
         return res.send({ message: "Order cancelled successfully" });
     } catch (error) {
@@ -290,4 +292,31 @@ const cancelOrder = async(req, res, next) => {
 };
 
 
-module.exports = { index, create, getOrderById, cancelOrder };
+
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {import("express").NextFunction} next
+ */
+const updateStatus = async(req, res, next) => {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    try {
+        const order = await OrderModel.findByPk(orderId);
+
+        if (!order) {
+            return res.status(404).send({ message: "Order not found" });
+        }
+
+        await OrderModel.update({ status }, { where: { id: orderId } });
+
+        return res.send({ message: "Order status updated successfully" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+module.exports = { index, create, getOrderById, cancelOrder, updateStatus };

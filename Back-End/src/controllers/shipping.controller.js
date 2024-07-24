@@ -38,21 +38,25 @@ const index = async(req, res, _next) => {
         } else if (currentUser.role === "seller") {
             // Jika user adalah seller, tampilkan produk berdasarkan user_id
             shippings = await ShippingModel.findAll({
-                where: {
-                    user_id: currentUser.id,
-                },
+                // where: {
+                //     user_id: currentUser.id,
+                // },
+                // include: [{
+                //     model: UserModel,
+                //     as: "user",
                 include: [{
-                    model: UserModel,
-                    as: "user",
+                    model: OrderModel,
+                    as: "order",
                     include: [{
-                        model: OrderModel,
-                        as: "order",
+                        model: OrderDetailModel,
+                        as: "order_detail",
                         include: [{
                             model: ProductModel,
                             as: "product",
                         }, ],
                     }, ],
                 }, ],
+                // }, ],
             });
         } else {
             return res.status(403).send({ message: "role tidak valid" });
